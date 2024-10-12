@@ -1,3 +1,4 @@
+#include "cmd.h"
 #include "tool.h"
 #include "proj.h"
 
@@ -6,6 +7,7 @@
 void DrawTool::Press(int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
+    mPrevPos = tp;
     Tilemap& map = mProj.maps[mapNum];
     if (!map.IsValid(tp)) {
         return;
@@ -28,6 +30,11 @@ void DrawTool::Move(int mapNum, PixPoint const& pos, int b)
         return;
     }
 
+    if (tp == mPrevPos) {
+        return;
+    }
+    mPrevPos = tp;
+
     if (b & LEFT) {
         Plonk(mapNum, tp, mEd.leftPen);
     }
@@ -48,13 +55,7 @@ void DrawTool::Release(int mapNum, PixPoint const& pos, int b)
 
 void DrawTool::Plonk(int mapNum, TilePoint const& tp, Cell const& pen)
 {
-    Tilemap& map = mProj.maps[mapNum];
-    assert(map.IsValid(tp));
-    map.CellAt(tp) = pen;
-    mEd.modified = true;
-    MapRect dirty(tp, 1, 1);
-    for (auto l : mEd.listeners) {
-        l->ProjMapModified(mapNum, dirty);
-    }
+    PlonkCmd* cmd = new PlonkCmd(mEd, mapNum, tp, pen);
+    mEd.AddCmd(cmd);
 }
 

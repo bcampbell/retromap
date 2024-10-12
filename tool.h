@@ -39,6 +39,7 @@ public:
     virtual void Move(int mapNum, PixPoint const& pos, int b);
     virtual void Release(int mapNum, PixPoint const& pos, int b);
 private:
+    TilePoint mPrevPos;
     void Plonk(int mapNum, TilePoint const& tp, Cell const& pen);
 };
 

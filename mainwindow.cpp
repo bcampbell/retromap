@@ -67,6 +67,14 @@ void MainWindow::createActions()
     mActions.importTileset = new QAction(tr("&Import tileset..."), this);
     connect(mActions.importTileset, &QAction::triggered, this, &MainWindow::importTileset);
 
+    mActions.undo = new QAction(tr("&Undo"), this);
+    mActions.undo->setShortcuts(QKeySequence::Undo);
+    connect(mActions.undo, &QAction::triggered, this, [self=this]() {self->mEd.Undo();});
+
+    mActions.redo = new QAction(tr("&Redo"), this);
+    mActions.redo->setShortcuts(QKeySequence::Redo);
+    connect(mActions.redo, &QAction::triggered, this, [self=this]() {self->mEd.Redo();});
+
     mActions.open = new QAction(tr("&Open map..."), this);
     mActions.open->setShortcuts(QKeySequence::Open);
     connect(mActions.open, &QAction::triggered, this, &MainWindow::open);
@@ -112,6 +120,12 @@ void MainWindow::createMenus()
         m->addAction(mActions.saveAs);
         m->addSeparator();
         m->addAction(mActions.exit);
+        menuBar()->addMenu(m);
+    }
+    {
+        QMenu* m = new QMenu(tr("&Edit"), this);
+        m->addAction(mActions.undo);
+        m->addAction(mActions.redo);
         menuBar()->addMenu(m);
     }
     {

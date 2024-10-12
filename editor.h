@@ -5,6 +5,7 @@
 #include <set>
 #include "proj.h"
 
+class Cmd;
 
 class EditListener
 {
@@ -27,7 +28,7 @@ class Editor {
 public:
     // start with a default proj
     Editor();
-    ~Editor() {}
+    ~Editor();
 
     Proj proj;
     bool modified{false};
@@ -35,9 +36,16 @@ public:
     std::string tilesetFilename;
     std::set<EditListener*> listeners;
 
+	std::vector<Cmd*> undoStack;
+	std::vector<Cmd*> redoStack;
+
     // TODO: move this out into editor window.
     Cell leftPen;
     Cell rightPen;
+
+    void AddCmd(Cmd* cmd);
+    void Undo();
+    void Redo();
 };
 
 

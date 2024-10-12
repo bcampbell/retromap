@@ -20,8 +20,13 @@ struct Point
 // A position on a map, in tile coords.
 struct TilePoint : public Point
 {
+    TilePoint() : Point(0, 0) {}
     TilePoint(int xpos, int ypos) : Point(xpos,ypos) {}
 };
+
+inline bool operator==(TilePoint const& a, TilePoint const& b)
+    {return a.x == b.x && a.y == b.y;}
+
 
 // A position on a map, in map pixels.
 struct PixPoint : public Point
