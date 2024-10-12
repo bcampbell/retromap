@@ -87,9 +87,6 @@ struct Proj
     Tileset tileset;
     Palette palette;
 
-    //int PixW() const { return map.w * tileset.tw;}
-    //int PixH() const { return map.h * tileset.th;}
-
     TilePoint ToTilePoint(PixPoint const& pp) const {
         return TilePoint(pp.x / tileset.tw, pp.y / tileset.th);
     }
@@ -100,4 +97,7 @@ struct Proj
 };
 
 
+
+void WriteProj(Proj const& proj, std::vector<uint8_t>& out);
+bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end);
 

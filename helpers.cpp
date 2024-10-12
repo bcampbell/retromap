@@ -132,70 +132,35 @@ void InitProj(Proj* proj)
 
 // Safely write map out to a file.
 // Tiles first, then colours. No metadata.
-bool WriteMap(Tilemap const& map, QString const& filename)
+bool SaveProject(Proj const& proj, QString const& filename)
 {
+
     QSaveFile out(filename);
     if (!out.open(QIODevice::WriteOnly)) {
         return false;
     }
-    for (int y = 0; y < map.h; ++y) {
-        std::vector<uint8_t> buf;
-        for (int x = 0; x < map.w; ++x) {
-            Cell const& c = map.CellAt(TilePoint{x, y});
-            // clip tile to 8 bit
-            buf.push_back((uint8_t)c.tile);
-        }
-        out.write((const char*)buf.data(), (qint64)buf.size());
-    }
-    for (int y = 0; y < map.h; ++y) {
-        std::vector<uint8_t> buf;
-        for (int x = 0; x < map.w; ++x) {
-            Cell const& c = map.CellAt(TilePoint{x, y});
-            // clip colours to 4 bit, paper in upper nibble, ink in lower.
-            // (c64 colour ram is only 4bit, so paper will be ignored).
-            uint8_t colour = ((c.paper & 0x0f)<<4) | (c.ink & 0x0f);
-            buf.push_back(colour);
-        }
-        out.write((const char*)buf.data(), (qint64)buf.size());
-    }
+
+    std::vector<uint8_t> buf;
+    WriteProj(proj, buf);
+    out.write((const char*)buf.data(), (qint64)buf.size());
 
     return out.commit();
 }
 
-bool ReadMap(Tilemap& map, QString const& filename, int w, int h)
+bool LoadProject(Proj& proj, QString const& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
-
-    map.w = w;
-    map.h = h;
-    map.cells.resize(map.w * map.h);
-
-    // tiles
-    for (int y = 0; y < h; ++y) {
-        std::vector<uint8_t> buf(w);
-        qint64 n = file.read((char*)buf.data(), (qint64)buf.size());
-        if (n != (qint64)buf.size()) {
-            return false;
-        }
-        for (int x = 0; x < w; ++x) {
-            map.CellAt(TilePoint{x, y}).tile = buf[x];
-        }
+    // slurp file into memory
+    std::vector<uint8_t> buf;
+    qint64 expectedSize = file.size();
+    buf.resize(expectedSize);
+    qint64 n = file.read((char*)buf.data(), (qint64)buf.size());
+    if (n != expectedSize) {
+        return false;
     }
-    // colours
-    for (int y = 0; y < h; ++y) {
-        std::vector<uint8_t> buf(w);
-        qint64 n = file.read((char*)buf.data(), (qint64)buf.size());
-        if (n != (qint64)buf.size()) {
-            return false;
-        }
-        for (int x = 0; x < w; ++x) {
-            map.CellAt(TilePoint{x, y}).ink = buf[x] & 0x0f;
-            map.CellAt(TilePoint{x, y}).paper = (buf[x]>>4) & 0x0f;
-        }
-    }
-    return true;
+    return ReadProj(proj, buf.data(), buf.data() + buf.size()); 
 }
 

@@ -206,12 +206,11 @@ void MainWindow::createWidgets()
 
 bool MainWindow::save()
 {
-    /*
     if (mEd.mapFilename.empty()) {
         return saveAs();
     }
 
-    bool ok = WriteMap(mEd.proj.map, QString::fromStdString(mEd.mapFilename));
+    bool ok = SaveProject(mEd.proj, QString::fromStdString(mEd.mapFilename));
     if (!ok) {
         // TODO: proper error message
         QMessageBox::critical(this, tr("Save failed"), tr("Poop. It's all gone pear-shaped."));
@@ -219,7 +218,6 @@ bool MainWindow::save()
     }
 
     mEd.modified = false;
-    */
     return true;
 }
 
@@ -231,7 +229,6 @@ bool MainWindow::saveAs()
     saveFile(fileFormat);
     */
 
-    /*
     QString initialPath = QDir::currentPath() + "/untitled.bin";
     if (!mEd.mapFilename.empty()) {
         initialPath = QString::fromStdString(mEd.mapFilename);
@@ -242,7 +239,7 @@ bool MainWindow::saveAs()
     if (fileName.isEmpty())
         return false;
 
-    bool ok = WriteMap(mEd.proj.map, fileName);
+    bool ok = SaveProject(mEd.proj, fileName);
     if (!ok) {
         // TODO: proper error message
         QMessageBox::critical(this, tr("Save map as failed"), tr("Poop. It's all gone pear-shaped."));
@@ -250,7 +247,6 @@ bool MainWindow::saveAs()
     }
     mEd.mapFilename = fileName.toStdString();
     mEd.modified = false;
-    */
     return true;
 }
 

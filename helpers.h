@@ -10,6 +10,6 @@ void RenderCell(QImage& targ, QPoint pos, Tileset const& tileset, Palette const&
 bool ImportTileset(QString const& filename, Tileset& tileset, int tilew, int tileh);
 void InitProj(Proj* proj);
 
-bool WriteMap(Tilemap const& map, QString const& filename);
-bool ReadMap(Tilemap& map, QString const& filename, int w, int h);
+bool SaveProject(Proj const& proj, QString const& filename);
+bool LoadProject(Proj& proj, QString const& filename);
 

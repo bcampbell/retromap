@@ -22,6 +22,7 @@ my_sources = ['editor.cpp',
   'mapwidget.cpp',
   'palettewidget.cpp',
   'penwidget.cpp',
+  'proj.cpp',
   'tilesetwidget.cpp',
   'tool.cpp']
 
