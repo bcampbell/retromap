@@ -9,7 +9,7 @@
 class MapWidget;
 class PaletteWidget;
 class PenWidget;
-class TilesetWidget;
+class CharsetWidget;
 class QAction;
 
 
@@ -24,7 +24,7 @@ public:
 
     // EditListener
     virtual void ProjPenChanged();
-    virtual void ProjTilesetModified();
+    virtual void ProjCharsetModified();
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
     virtual void ProjMapsInserted(int mapNum, int count);
     virtual void ProjMapsRemoved(int mapNum, int count);
@@ -32,7 +32,7 @@ protected:
     void closeEvent(QCloseEvent *event) override;
     void createWidgets();
 private slots:
-    void importTileset();
+    void importCharset();
     void open();
     bool save();
     bool saveAs();
@@ -49,11 +49,11 @@ private:
     Editor& mEd;
 
     MapWidget* mMapWidget;
-    TilesetWidget* mTilesetWidget;
+    CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;
     struct {
-       QAction* importTileset{nullptr};
+       QAction* importCharset{nullptr};
        QAction* open{nullptr};
        QAction* save{nullptr};
        QAction* saveAs{nullptr};

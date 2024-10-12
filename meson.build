@@ -5,27 +5,31 @@ qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'])
 
 #incdirs = include_directories('src')
 
-my_headers = ['cmd.h',
+my_headers = [
+  'cmd.h',
+  'charsetwidget.h',
   'editor.h',
   'helpers.h',
   'mainwindow.h',
   'mapwidget.h',
+  'mapsizedialog.h',
   'palettewidget.h',
   'penwidget.h',
   'proj.h',
-  'tilesetwidget.h',
   'tool.h']
 
-my_sources = ['cmd.cpp',
+my_sources = [
+  'charsetwidget.cpp',
+  'cmd.cpp',
   'editor.cpp',
   'helpers.cpp',
   'main.cpp',
   'mainwindow.cpp',
   'mapwidget.cpp',
+  'mapsizedialog.cpp',
   'palettewidget.cpp',
   'penwidget.cpp',
   'proj.cpp',
-  'tilesetwidget.cpp',
   'tool.cpp']
 
 #ep_qt_resources = ['resources.qrc']

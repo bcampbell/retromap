@@ -6,15 +6,35 @@
 #include <QString>
 #include <QSaveFile>
 
-void RenderCell(QImage& targ, QPoint pos, Tileset const& tileset, Palette const& palette, Cell const& pen)
+static const uint8_t placeholder8x8[8*8] = {
+    0,0,0,0, 0,0,0,0,
+    0,1,1,1, 1,1,1,0,
+    0,1,0,0, 0,0,1,0,
+    0,1,0,0, 0,0,1,0,
+
+    0,1,0,0, 0,0,1,0,
+    0,1,0,0, 0,0,1,0,
+    0,1,1,1, 1,1,1,0,
+    0,0,0,0, 0,0,0,0,
+};
+
+void RenderCell(QImage& targ, QPoint pos, Charset const& charset, Palette const& palette, Cell const& pen)
 {
     //printf("renderCell(%d %d tile:%d ink:%d paper:%d)\n", pos.x(), pos.y(), pen.tile, pen.ink, pen.paper);
     uint8_t const* ink = &(palette.colours[pen.ink*4]);
     uint8_t const* paper = &(palette.colours[pen.paper*4]);
-    uint8_t const* src = tileset.RawConst(pen.tile);
-    for (int cy = 0; cy < tileset.th; ++cy) {
+    uint8_t const* src;
+   
+    if (pen.tile < charset.ntiles) {
+        src = charset.RawConst(pen.tile);
+    } else {
+        assert(charset.tw == 8 && charset.th == 8);
+        src = placeholder8x8;
+    }
+   
+    for (int cy = 0; cy < charset.th; ++cy) {
         uchar* dest = targ.scanLine(pos.y() + cy) + (pos.x() * 4);
-        for (int cx = 0; cx < tileset.th; ++cx) {
+        for (int cx = 0; cx < charset.th; ++cx) {
             uint8_t pix = *src++;
             if (pix == 0) {
                 *dest++ = paper[0];
@@ -32,7 +52,7 @@ void RenderCell(QImage& targ, QPoint pos, Tileset const& tileset, Palette const&
 }
 
 
-bool ImportTileset(QString const& filename, Tileset& tileset, int tilew, int tileh)
+bool ImportCharset(QString const& filename, Charset& charset, int tilew, int tileh)
 {
     QImage im;
     if (!im.load(filename)) {
@@ -50,20 +70,20 @@ bool ImportTileset(QString const& filename, Tileset& tileset, int tilew, int til
         return false;   // No tiles!
     }
 
-    tileset.ntiles = gridw * gridh;
-    tileset.tw = tilew;
-    tileset.th = tileh;
-    tileset.images.resize(tileset.tw * tileset.th * tileset.ntiles); // 1byte/pixel
+    charset.ntiles = gridw * gridh;
+    charset.tw = tilew;
+    charset.th = tileh;
+    charset.images.resize(charset.tw * charset.th * charset.ntiles); // 1byte/pixel
 
     int tile = 0;
     for (int ty = 0; ty < gridh; ++ty) {
         for (int tx = 0; tx < gridw; ++tx) {
-            uint8_t* dest = tileset.Raw(tile);
+            uint8_t* dest = charset.Raw(tile);
             ++tile;
             // copy a tile
-            for (int y = 0; y < tileset.th; ++y) {
-                uint8_t const* src = im.scanLine(ty * tileset.th + y) + (1 * tx * tileset.tw);
-                for (int x = 0; x < tileset.tw; ++x) {
+            for (int y = 0; y < charset.th; ++y) {
+                uint8_t const* src = im.scanLine(ty * charset.th + y) + (1 * tx * charset.tw);
+                for (int x = 0; x < charset.tw; ++x) {
                     *dest++ = *src++;
                 }
             }
@@ -102,9 +122,9 @@ void InitProj(Proj* proj)
     map.cells.resize(map.w * map.h);
     proj->maps.push_back(map);
 
-    if (!ImportTileset("c64charset.png", proj->tileset, 8, 8)) {
+    if (!ImportCharset("c64charset.png", proj->charset, 8, 8)) {
         printf("Poop. load fail.\n");
-        Tileset& t = proj->tileset;
+        Charset& t = proj->charset;
         t.tw = 8;
         t.th = 8;
         t.ntiles = 2;

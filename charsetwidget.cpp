@@ -1,36 +1,50 @@
-#include "tilesetwidget.h"
+#include "charsetwidget.h"
 #include "helpers.h"
 
 #include <QPainter>
 #include <QMouseEvent>
 
-TilesetWidget::TilesetWidget(QWidget* parent, Tileset& tiles, Palette& palette) :
+CharsetWidget::CharsetWidget(QWidget* parent) :
     QWidget(parent),
-    mTiles(tiles),
-    mPalette(palette)
+    mTiles(nullptr),
+    mPalette(nullptr)
 {
 //    setAttribute(Qt::WA_StaticContents);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    InitTiles();
+    mLeftTile = 0;
+    mRightTile = 32;
 }
 
-QSize TilesetWidget::sizeHint() const
+void CharsetWidget::SetTiles(Charset* tiles, Palette* palette)
 {
-    int tw = mTiles.tw;
-    int th = mTiles.th;
+    mTiles = tiles;
+    mPalette = palette;
+    InitTiles();
+    update();
+}
+
+
+
+QSize CharsetWidget::sizeHint() const
+{
+    int tw = mTiles ? mTiles->tw : 8;
+    int th = mTiles ? mTiles->th : 8;
 
     return QSize(mGridW * tw * mZoom, mGridH * th * mZoom);
 }
 
 
-void TilesetWidget::InitTiles()
+void CharsetWidget::InitTiles()
 {
+    if (!mTiles) {
+        return;
+    }
     mGridW = 16;
-    mGridH = mTiles.ntiles / mGridW;
+    mGridH = mTiles->ntiles / mGridW;
 
-    // Render tileset to backing image
-    int tw = mTiles.tw;
-    int th = mTiles.th;
+    // Render charset to backing image
+    int tw = mTiles->tw;
+    int th = mTiles->th;
     mBacking = QImage(mGridW * tw, mGridH * th, QImage::Format_RGBX8888);
     Cell cell;
     cell.tile = 0;
@@ -38,21 +52,16 @@ void TilesetWidget::InitTiles()
     cell.paper = 0;
     for (int ty = 0; ty < mGridH; ++ty) {
         for (int tx = 0; tx < mGridW; ++tx) {
-            RenderCell(mBacking, QPoint(tx * tw, ty * th), mTiles, mPalette, cell);
+            RenderCell(mBacking, QPoint(tx * tw, ty * th), *mTiles, *mPalette, cell);
             cell.tile++;
-            if (cell.tile >= mTiles.ntiles) {
+            if (cell.tile >= mTiles->ntiles) {
                 break;
             }
         }
     }
-
-    mLeftTile = 0;
-    mRightTile = 32;
-
-    update();
 };
 
-void TilesetWidget::mousePressEvent(QMouseEvent *event)
+void CharsetWidget::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
         int picked = PickTile(event->position().toPoint());
@@ -80,19 +89,19 @@ void TilesetWidget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TilesetWidget::mouseMoveEvent(QMouseEvent *event)
+void CharsetWidget::mouseMoveEvent(QMouseEvent *event)
 {
 }
 
-void TilesetWidget::mouseReleaseEvent(QMouseEvent *event)
+void CharsetWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 }
 
 // Return the onscreen bounding box for given tile number
-QRect TilesetWidget::TileBound(int tile) const
+QRect CharsetWidget::TileBound(int tile) const
 {
-    int tw = mTiles.tw;
-    int th = mTiles.th;
+    int tw = mTiles ? mTiles->tw : 8;
+    int th = mTiles ? mTiles->th : 8;
     return QRect((tile % mGridW) * tw * mZoom,
         (tile / mGridW) * th * mZoom,
         tw * mZoom,
@@ -100,21 +109,24 @@ QRect TilesetWidget::TileBound(int tile) const
 }
 
 // Return tile under pos.
-int TilesetWidget::PickTile(QPoint pos) const
+int CharsetWidget::PickTile(QPoint pos) const
 {
-    int tw = mTiles.tw;
-    int th = mTiles.th;
+    if (!mTiles) {
+        return -1;
+    }
+    int tw = mTiles->tw;
+    int th = mTiles->th;
     int tx = pos.x() / (tw * mZoom);
     int ty = pos.y() / (th * mZoom);
     int picked = (ty * mGridW) + tx;
 
-    if (picked < 0 || picked > mTiles.ntiles) {
+    if (picked < 0 || picked > mTiles->ntiles) {
         picked = -1;
     }
     return picked;
 }
 
-void TilesetWidget::paintEvent(QPaintEvent *event)
+void CharsetWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     QRect r = event->rect();

@@ -22,6 +22,9 @@ public:
     int CurrentMap() {return mCurMap;}
     // EditListener
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
+    virtual void ProjMapsInserted(int first, int count);
+    virtual void ProjMapsRemoved(int first, int count);
+    virtual void ProjCharsetModified();
 
 protected:
     void mousePressEvent(QMouseEvent *event);

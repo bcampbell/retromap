@@ -34,10 +34,10 @@ void MapWidget::SetCurrentMap(int mapNum) {
 
         // resize the backing bitmap
         Tilemap& map = mProj.maps[mapNum];
-        int w = mProj.tileset.tw * map.w;
-        int h = mProj.tileset.th * map.h;
+        int w = mProj.charset.tw * map.w;
+        int h = mProj.charset.th * map.h;
         mBacking = QImage(w, h, QImage::Format_RGBX8888),
-
+        resize(sizeHint());
         // force redraw
         ProjMapModified(mCurMap, map.Bounds());
     }
@@ -47,8 +47,8 @@ void MapWidget::SetCurrentMap(int mapNum) {
 QSize MapWidget::sizeHint() const
 {
     Tilemap& map = mProj.maps[mCurMap];
-    int w = mProj.tileset.tw * map.w;
-    int h = mProj.tileset.th * map.h;
+    int w = mProj.charset.tw * map.w;
+    int h = mProj.charset.th * map.h;
     return QSize(w * mZoom, h * mZoom);
 }
 
@@ -133,18 +133,44 @@ void MapWidget::ProjMapModified(int mapNum, MapRect const& dirty)
         return; // Happened on some other map.
     }
     Tilemap& map = mProj.maps[mCurMap];
-    int tw = mProj.tileset.tw;
-    int th = mProj.tileset.th;
+    int tw = mProj.charset.tw;
+    int th = mProj.charset.th;
     // update the backing image
     for (int y = dirty.pos.y; y < dirty.pos.y + dirty.h; ++y) {
         for (int x = dirty.pos.x; x < dirty.pos.x + dirty.w; ++x) {
             Cell const& cell = map.CellAt(TilePoint(x, y));
-            RenderCell(mBacking, QPoint(x * tw, y * th), mProj.tileset, mProj.palette, cell);
+            RenderCell(mBacking, QPoint(x * tw, y * th), mProj.charset, mProj.palette, cell);
         }
     }
 
     // redraw affected area
     update(QRect(dirty.pos.x * tw * mZoom, dirty.pos.y * th * mZoom,
             dirty.w * tw * mZoom, dirty.h * th * mZoom));
+}
+
+
+// EditListener
+void MapWidget::ProjMapsInserted(int first, int count)
+{
+    if (mCurMap >= first) {
+        SetCurrentMap(mCurMap + count);
+    }
+}
+
+void MapWidget::ProjMapsRemoved(int first, int count)
+{
+    if (mCurMap >= first+count) {
+        SetCurrentMap(mCurMap - count);
+        return;
+    }
+    if (mCurMap >= first) {
+        SetCurrentMap(std::min(int(mProj.maps.size()) - 1, first));
+    }
+}
+
+void MapWidget::ProjCharsetModified()
+{
+    Tilemap& map = mProj.maps[mCurMap];
+    ProjMapModified(mCurMap, map.Bounds());
 }
 

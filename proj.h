@@ -64,7 +64,7 @@ struct Tilemap
     }
 };
 
-struct Tileset
+struct Charset
 {
     int tw;
     int th;
@@ -89,15 +89,15 @@ struct Palette
 struct Proj
 {
     std::vector<Tilemap> maps;
-    Tileset tileset;
+    Charset charset;
     Palette palette;
 
     TilePoint ToTilePoint(PixPoint const& pp) const {
-        return TilePoint(pp.x / tileset.tw, pp.y / tileset.th);
+        return TilePoint(pp.x / charset.tw, pp.y / charset.th);
     }
 
     PixPoint ToPixPoint(TilePoint const& mp) const {
-        return PixPoint(mp.x * tileset.tw, mp.y * tileset.th);
+        return PixPoint(mp.x * charset.tw, mp.y * charset.th);
     }
 };
 

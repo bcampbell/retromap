@@ -1,10 +1,12 @@
 #include "mainwindow.h"
 
+#include "cmd.h"
 #include "helpers.h"
 #include "mapwidget.h"
+#include "mapsizedialog.h"
 #include "palettewidget.h"
 #include "penwidget.h"
-#include "tilesetwidget.h"
+#include "charsetwidget.h"
 
 #include <QAction>
 #include <QDir>
@@ -18,8 +20,6 @@
 MainWindow::MainWindow(QWidget *parent, Editor& ed)
     : QMainWindow(parent), mEd(ed)
 {
-    // TODO: read QCoreApplication::arguments()
-
     mEd.modified = false;
 
     mEd.listeners.insert(this);
@@ -64,8 +64,8 @@ bool MainWindow::maybeSave()
 
 void MainWindow::createActions()
 {
-    mActions.importTileset = new QAction(tr("&Import tileset..."), this);
-    connect(mActions.importTileset, &QAction::triggered, this, &MainWindow::importTileset);
+    mActions.importCharset = new QAction(tr("&Import charset..."), this);
+    connect(mActions.importCharset, &QAction::triggered, this, &MainWindow::importCharset);
 
     mActions.undo = new QAction(tr("&Undo"), this);
     mActions.undo->setShortcuts(QKeySequence::Undo);
@@ -95,7 +95,7 @@ void MainWindow::createActions()
     mActions.help->setShortcuts(QKeySequence::HelpContents);
     connect(mActions.help, &QAction::triggered, this, &MainWindow::help);
 
-    mActions.addMap = new QAction(tr("Add map"), this);
+    mActions.addMap = new QAction(tr("Add map..."), this);
     mActions.addMap->setShortcut(QKeySequence(Qt::Key_A));
     connect(mActions.addMap, &QAction::triggered, this, &MainWindow::addMap);
 
@@ -113,7 +113,7 @@ void MainWindow::createMenus()
 {
     {
         QMenu* m = new QMenu(tr("&File"), this);
-        m->addAction(mActions.importTileset);
+        m->addAction(mActions.importCharset);
         m->addAction(mActions.open);
         m->addSeparator();
         m->addAction(mActions.save);
@@ -149,9 +149,12 @@ void MainWindow::createWidgets()
 
     mMapWidget = new MapWidget(nullptr, mEd);
 
-    mTilesetWidget = new TilesetWidget(nullptr, mEd.proj.tileset, mEd.proj.palette);
-    mTilesetWidget->setLeftTile(mEd.leftPen.tile);
-    mTilesetWidget->setRightTile(mEd.rightPen.tile);
+    mCharsetWidget = new CharsetWidget(nullptr);
+
+    mCharsetWidget->SetTiles(&mEd.proj.charset, &mEd.proj.palette);
+
+    mCharsetWidget->setLeftTile(mEd.leftPen.tile);
+    mCharsetWidget->setRightTile(mEd.rightPen.tile);
 
     mPenWidget = new PenWidget(nullptr, mEd);
 
@@ -179,7 +182,7 @@ void MainWindow::createWidgets()
     }
     {
         QScrollArea* scroll = new QScrollArea(this);
-        scroll->setWidget(mTilesetWidget);
+        scroll->setWidget(mCharsetWidget);
         h->addWidget(scroll, Qt::AlignLeading);
     }
     top->addLayout(h);
@@ -188,14 +191,14 @@ void MainWindow::createWidgets()
 
     // Wire it all up!
 
-    connect(mTilesetWidget, &TilesetWidget::leftChanged, this, [self=this](int tile) {
+    connect(mCharsetWidget, &CharsetWidget::leftChanged, this, [self=this](int tile) {
         self->mEd.leftPen.tile = tile;
         for (auto l : self->mEd.listeners) {
             l->ProjPenChanged();
         }
     });
 
-    connect(mTilesetWidget, &TilesetWidget::rightChanged, this, [self=this](int tile) {
+    connect(mCharsetWidget, &CharsetWidget::rightChanged, this, [self=this](int tile) {
         self->mEd.rightPen.tile = tile;
         for (auto l : self->mEd.listeners) {
             l->ProjPenChanged();
@@ -292,48 +295,26 @@ void MainWindow::open()
 #endif
 }
 
-void MainWindow::importTileset()
+void MainWindow::importCharset()
 {
-#if 0
     QString initialPath = QDir::currentPath();
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Import Tileset"),
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Import Charset"),
                                initialPath,
                                tr("PNG Files (*.png);;All Files (*)"));
     if (fileName.isEmpty())
         return;
 
-    Tileset newTiles;
-    if (!ImportTileset(fileName, newTiles, 8, 8)) {
+    Charset newTiles;
+    if (!ImportCharset(fileName, newTiles, 8, 8)) {
         // TODO: proper error message
-        QMessageBox::critical(this, tr("Import Tileset failed"), tr("Poop. It's all gone pear-shaped."));
+        QMessageBox::critical(this, tr("Import Charset failed"), tr("Poop. It's all gone pear-shaped."));
         return;
     }
 
-    mEd->tileset = newTiles;
-    for (auto l : mEd->listeners) {
-        l->ProjTilesetChanged();
-    }
-#endif
+    ReplaceCharsetCmd *cmd = new ReplaceCharsetCmd(mEd, newTiles);
+    mEd.AddCmd(cmd);
 }
-
-
-
-#if 0
-bool MainWindow::saveFile(const QByteArray &fileFormat)
-{
-    QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
-                               initialPath,
-                               tr("%1 Files (*.%2);;All Files (*)")
-                               .arg(QString::fromLatin1(fileFormat.toUpper()))
-                               .arg(QString::fromLatin1(fileFormat)));
-    if (fileName.isEmpty())
-        return false;
-    return scribbleArea->saveImage(fileName, fileFormat.constData());
-}
-#endif
 
 void MainWindow::help()
 {
@@ -343,18 +324,21 @@ void MainWindow::help()
 
 void MainWindow::addMap()
 {
+    Tilemap& cur = mEd.proj.maps[mMapWidget->CurrentMap()];
+    MapSizeDialog dlg(this, cur.w, cur.h);
+    if (dlg.exec() != QDialog::Accepted) {
+        return;
+    }
+
     Tilemap map;
-    map.w = 40;
-    map.h = 25;
+    map.w = dlg.ResultW();
+    map.h = dlg.ResultH();
     map.cells.resize(map.w * map.h);
 
     // insert it after current one.
     int n = mMapWidget->CurrentMap() + 1;
-    auto it = mEd.proj.maps.begin() + n;
-    mEd.proj.maps.insert(it, map);
-    for (auto l : mEd.listeners) {
-        l->ProjMapsInserted(n, 1);
-    }
+    InsertMapsCmd* cmd = new InsertMapsCmd(mEd, {map}, n);
+    mEd.AddCmd(cmd);
     mMapWidget->SetCurrentMap(n);
 }
 
@@ -385,22 +369,18 @@ void MainWindow::ProjMapModified(int mapNum, MapRect const& dirty)
 }
 
 // EditListener
-void MainWindow::ProjTilesetModified()
+void MainWindow::ProjCharsetModified()
 {
+    mCharsetWidget->SetTiles(&mEd.proj.charset, &mEd.proj.palette);
 }
 
 // EditListener
 void MainWindow::ProjMapsInserted(int first, int count)
 {
-    // maybe should just be handled by mapwidget
-    int cur = mMapWidget->CurrentMap();
-    if (cur >= first) {
-        mMapWidget->SetCurrentMap(cur + count);
-    }
 }
 
+// EditListener
 void MainWindow::ProjMapsRemoved(int first, int count)
 {
-    assert(false);  // TODO!
 }
 

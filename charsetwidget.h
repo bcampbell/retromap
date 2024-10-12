@@ -6,13 +6,15 @@
 #include <QImage>
 #include "proj.h"
 
-class TilesetWidget : public QWidget
+class CharsetWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    TilesetWidget() = delete;
-	TilesetWidget(QWidget* parent, Tileset& tiles, Palette& palette);
+    CharsetWidget() = delete;
+	CharsetWidget(QWidget* parent);
+
+    void SetTiles(Charset* tiles, Palette* palette);
 
     // <0 = none selected
     int leftTile() const {return mLeftTile;}
@@ -36,8 +38,8 @@ private:
     void InitTiles();
     int PickTile(QPoint pos) const;
 
-    Tileset& mTiles;
-    Palette& mPalette;
+    Charset* mTiles{nullptr};
+    Palette* mPalette{nullptr};
 
     // tile layout
     int mGridW{0};

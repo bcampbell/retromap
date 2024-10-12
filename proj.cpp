@@ -25,8 +25,8 @@ void WriteProj(Proj const& proj, std::vector<uint8_t>& out)
         }
     }
 
-    // Write tileset
-    Tileset const& tiles = proj.tileset;
+    // Write charset
+    Charset const& tiles = proj.charset;
     {
         out.push_back((uint8_t)tiles.tw);
         out.push_back((uint8_t)tiles.th);
@@ -72,19 +72,19 @@ bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end)
         }
         proj.maps.push_back(map);
     }
-    // Read tileset.
-    Tileset& tileset = proj.tileset;
+    // Read charset.
+    Charset& charset = proj.charset;
     {
         if ((end - p) < (1+1+2)) {return false;}
-        tileset.tw = (int)*p++;
-        tileset.th = (int)*p++;
-        tileset.ntiles = (int)((p[1]<<8) + p[0]);
+        charset.tw = (int)*p++;
+        charset.th = (int)*p++;
+        charset.ntiles = (int)((p[1]<<8) + p[0]);
         p += 2;
         
         // enough tile image data?
-        int n = tileset.tw * tileset.th * tileset.ntiles;
+        int n = charset.tw * charset.th * charset.ntiles;
         if ((end - p) < n) { return false; }
-        tileset.images = std::vector<uint8_t>(p, p + n);
+        charset.images = std::vector<uint8_t>(p, p + n);
         p += n;
     }
 

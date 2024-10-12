@@ -29,7 +29,7 @@ Editor::~Editor()
 // Adds a command to the undo stack, and calls its Do() fn
 void Editor::AddCmd(Cmd* cmd)
 {
-    const int maxundos = 128;
+    //const int maxundos = 128;
 
     undoStack.push_back(cmd);
     if(cmd->State() == Cmd::NOT_DONE) {

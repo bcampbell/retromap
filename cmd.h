@@ -33,3 +33,29 @@ private:
     Cell mPen;
 };
 
+
+class InsertMapsCmd : public Cmd
+{
+public:
+    InsertMapsCmd() = delete;
+    InsertMapsCmd(Editor& ed, std::vector<Tilemap> const& newMaps, int pos) :
+        Cmd(ed), mNewMaps(newMaps), mPos(pos) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    std::vector<Tilemap> mNewMaps;
+    int mPos;
+};
+
+class ReplaceCharsetCmd : public Cmd
+{
+public:
+    ReplaceCharsetCmd() = delete;
+    ReplaceCharsetCmd(Editor& ed, Charset const& newTiles) :
+        Cmd(ed), mTiles(newTiles) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    Charset mTiles;
+};
+

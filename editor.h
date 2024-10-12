@@ -12,7 +12,7 @@ class EditListener
 public:
     virtual ~EditListener() = default;
     virtual void ProjPenChanged() {};
-    virtual void ProjTilesetModified() {};
+    virtual void ProjCharsetModified() {};
     virtual void ProjMapModified(int mapNum, MapRect const& dirty) {};
     // Assume everything changed.
     virtual void ProjNuke() {};
