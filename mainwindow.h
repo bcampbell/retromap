@@ -5,6 +5,7 @@
 
 #include "proj.h"
 #include "editor.h"
+#include "mapeditor.h"
 
 class MapWidget;
 class PaletteWidget;
@@ -49,6 +50,7 @@ private:
     Editor& mEd;
 
     MapWidget* mMapWidget;
+    MapEditor  mPresenter;
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;

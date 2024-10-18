@@ -18,21 +18,23 @@
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent, Editor& ed)
-    : QMainWindow(parent), mEd(ed)
+    : QMainWindow(parent), mEd(ed), mPresenter(ed)
 {
     mEd.modified = false;
 
     mEd.listeners.insert(this);
-
     createActions();
     createMenus();
     createWidgets();
     setWindowTitle(tr("Retromap"));
     resize(500, 500);
+
+    mPresenter.AddView(mMapWidget);
     show();
 }
 
 MainWindow::~MainWindow() {
+    mPresenter.RemoveView(mMapWidget);
     mEd.listeners.erase(this);
 }
 
@@ -147,7 +149,7 @@ void MainWindow::createMenus()
 void MainWindow::createWidgets()
 {
 
-    mMapWidget = new MapWidget(nullptr, mEd);
+    mMapWidget = new MapWidget(nullptr);
 
     mCharsetWidget = new CharsetWidget(nullptr);
 
@@ -324,7 +326,7 @@ void MainWindow::help()
 
 void MainWindow::addMap()
 {
-    Tilemap& cur = mEd.proj.maps[mMapWidget->CurrentMap()];
+    Tilemap& cur = mEd.proj.maps[mPresenter.CurrentMap()];
     MapSizeDialog dlg(this, cur.w, cur.h);
     if (dlg.exec() != QDialog::Accepted) {
         return;
@@ -336,25 +338,25 @@ void MainWindow::addMap()
     map.cells.resize(map.w * map.h);
 
     // insert it after current one.
-    int n = mMapWidget->CurrentMap() + 1;
+    int n = mPresenter.CurrentMap() + 1;
     InsertMapsCmd* cmd = new InsertMapsCmd(mEd, {map}, n);
     mEd.AddCmd(cmd);
-    mMapWidget->SetCurrentMap(n);
+    mPresenter.SetCurrentMap(n);
 }
 
 void MainWindow::nextMap()
 {
-    int n = mMapWidget->CurrentMap() + 1;
+    int n = mPresenter.CurrentMap() + 1;
     if (n < (int)mEd.proj.maps.size()) {
-        mMapWidget->SetCurrentMap(n);
+        mPresenter.SetCurrentMap(n);
     }
 }
 
 void MainWindow::prevMap()
 {
-    int n = mMapWidget->CurrentMap() - 1;
+    int n = mPresenter.CurrentMap() - 1;
     if (n >= 0) {
-        mMapWidget->SetCurrentMap(n);
+        mPresenter.SetCurrentMap(n);
     }
 }
 

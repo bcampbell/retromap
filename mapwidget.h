@@ -8,23 +8,23 @@
 #include "editor.h"
 
 class Tool;
+class MapEditor;
 
-class MapWidget : public QWidget, EditListener {
+// View part of MVP
+
+class MapWidget : public QWidget {
     Q_OBJECT
 
 public:
     MapWidget() = delete;
-	MapWidget(QWidget* parent, Editor& ed);
+	MapWidget(QWidget* parent);
     virtual ~MapWidget();
 
-    // set which map we're looking at
-    void SetCurrentMap(int mapNum);
-    int CurrentMap() {return mCurMap;}
-    // EditListener
-    virtual void ProjMapModified(int mapNum, MapRect const& dirty);
-    virtual void ProjMapsInserted(int first, int count);
-    virtual void ProjMapsRemoved(int first, int count);
-    virtual void ProjCharsetModified();
+    // MapView methods
+    void SetPresenter(MapEditor* presenter);
+    void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
+    void MapModified(MapRect const& dirty);
+    void SetCursor(MapRect const& area);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -35,16 +35,16 @@ protected:
     QSize sizeHint() const override;
 
 private:
-    Editor& mEd;
-    Proj& mProj;
+    MapEditor* mPresenter{nullptr};
+    Tilemap* mTilemap{nullptr};
+    Charset* mCharset{nullptr};
+    Palette* mPalette{nullptr};
     QImage mBacking;
     int mZoom{3};
-    Tool* mTool;
-    int mCurMap{0};
 
-    PixPoint ToPixPoint(QPoint const& pt) const
-        {return PixPoint(pt.x()/mZoom, pt.y()/mZoom);}
-    void PlonkTile(int x, int y, Cell const& pen);
+    MapRect mCursor;
 
+    void UpdateBacking(MapRect const& dirty);
+    bool IsValidMap() const {return mTilemap && mCharset && mPalette;}
 };
 
