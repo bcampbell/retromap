@@ -32,10 +32,10 @@ my_sources = [
   'proj.cpp',
   'tool.cpp']
 
-#ep_qt_resources = ['resources.qrc']
+#qt_resources = ['resources.qrc']
 
 moc_files = qt6.preprocess(moc_headers: my_headers,
-#  qresources : ep_qt_resources,
+#  qresources : qt_resources,
   dependencies: qt6_dep)
 
 
@@ -43,6 +43,9 @@ executable('retromap',
   sources: [my_sources, moc_files],
   #  include_directories: incdirs,
   dependencies : [qt6_dep], #, png_dep, gif_dep, jpeg_dep],
-  win_subsystem: 'windows')
+  win_subsystem: 'windows',
+  install: true)
+
+
 
 
