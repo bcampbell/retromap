@@ -1,10 +1,11 @@
 #include "cmd.h"
 #include "tool.h"
 #include "proj.h"
+#include "mapview.h"
 
 #include <cassert>
 
-void DrawTool::Press(int mapNum, PixPoint const& pos, int b)
+void DrawTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     mPrevPos = tp;
@@ -21,10 +22,13 @@ void DrawTool::Press(int mapNum, PixPoint const& pos, int b)
     }
 }
 
-void DrawTool::Move(int mapNum, PixPoint const& pos, int b)
+void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
 {
     //printf("Move\n");
     TilePoint tp = mProj.ToTilePoint(pos);
+
+    view->SetCursor(MapRect(tp,1,1));
+
     Tilemap& map = mProj.maps[mapNum];
     if (!map.IsValid(tp)) {
         return;
@@ -43,7 +47,7 @@ void DrawTool::Move(int mapNum, PixPoint const& pos, int b)
     }
 }
 
-void DrawTool::Release(int mapNum, PixPoint const& pos, int b)
+void DrawTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
 {
     //printf("Release\n");
     TilePoint tp = mProj.ToTilePoint(pos);

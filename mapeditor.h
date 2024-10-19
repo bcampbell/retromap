@@ -1,12 +1,12 @@
 #include "editor.h"
 #include <set>
 
-// Presenter part of MVP
 
-class MapWidget;
+class MapView;
 struct Proj;
 class Tool;
 
+// MapEditor is Presenter part of MVP
 class MapEditor : public EditListener {
 
 public:
@@ -15,15 +15,15 @@ public:
     ~MapEditor();
 
     // set which map we're looking at
-    void AddView(MapWidget* view);
-    void RemoveView(MapWidget* view);
+    void AddView(MapView* view);
+    void RemoveView(MapView* view);
     void SetCurrentMap(int mapNum);
     int CurrentMap() {return mCurMap;}
 
     // Called by view
-    void Press(PixPoint const& pt, int button);
-    void Move(PixPoint const& pt, int button);
-    void Release(PixPoint const& pt, int button);
+    void Press(MapView* view, PixPoint const& pt, int button);
+    void Move(MapView* view, PixPoint const& pt, int button);
+    void Release(MapView* view, PixPoint const& pt, int button);
 
     // EditListener
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
@@ -33,7 +33,7 @@ public:
 
 private:
     Editor& mEd;
-    std::set<MapWidget*> mViews;
+    std::set<MapView*> mViews;
     Proj& mProj;
     Tool* mTool{nullptr};
     int mCurMap{0};

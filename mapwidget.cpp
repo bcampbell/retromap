@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 
+constexpr int CURSORPENW = 3;
 
 MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
 {
@@ -37,19 +38,41 @@ void MapWidget::SetMap(Tilemap* tilemap, Charset* charset, Palette* palette)
     update();
 }
 
+QRect MapWidget::MapRectToWidget(MapRect const& r) {
+    int tw = mCharset->tw;
+    int th = mCharset->th;
+    return QRect(r.pos.x * tw * mZoom, r.pos.y * th * mZoom,
+        r.w * tw * mZoom, r.h * th * mZoom);
+}
+
+void MapWidget::HideCursor()
+{
+    if(!mCursorOn) {
+        return;
+    }
+
+    // erase existing cursor
+    mCursorOn = false;
+    const int pw = CURSORPENW;
+    QRect r = MapRectToWidget(mCursor).adjusted(-pw,-pw, pw, pw);
+    update(r);
+}
+
 void MapWidget::SetCursor(MapRect const& cursor)
 {
+    HideCursor();   // erase existing, if any
+    mCursorOn = true;
     mCursor = cursor;
+    const int pw = CURSORPENW;
+    QRect r = MapRectToWidget(mCursor).adjusted(-pw,-pw, pw, pw);
+    update(r);
 }
 
 void MapWidget::MapModified(MapRect const& dirty)
 {
     if (IsValidMap()) {
         UpdateBacking(dirty);
-        int tw = mCharset->tw;
-        int th = mCharset->th;
-        update(QRect(dirty.pos.x * tw * mZoom, dirty.pos.y * th * mZoom,
-            dirty.w * tw * mZoom, dirty.h * th * mZoom));
+        update(MapRectToWidget(dirty));
     }
 }
 
@@ -102,33 +125,33 @@ static int toToolButtons(Qt::MouseButtons qb)
 
 void MapWidget::mousePressEvent(QMouseEvent *event)
 {
-    int butt = toToolButtons(event->buttons());
-    if (butt && mPresenter) {
+    if (mPresenter) {
+        int butt = toToolButtons(event->buttons());
         QPoint pos(event->position().toPoint());
         PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Press(pix, butt);
+        mPresenter->Press(this, pix, butt);
     }
     event->accept();
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    int butt = toToolButtons(event->buttons());
-    if (butt && mPresenter) {
+    if (mPresenter) {
+        int butt = toToolButtons(event->buttons());
         QPoint pos(event->position().toPoint());
         PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Move(pix, butt);
+        mPresenter->Move(this, pix, butt);
     }
     event->accept();
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    int butt = toToolButtons(event->buttons());
-    if (butt && mPresenter) {
+    if (mPresenter) {
+        int butt = toToolButtons(event->buttons());
         QPoint pos(event->position().toPoint());
         PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Release(pix, butt);
+        mPresenter->Release(this, pix, butt);
     }
     event->accept();
 }
@@ -156,10 +179,25 @@ void MapWidget::wheelEvent(QWheelEvent *event)
 void MapWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    QRect r = event->rect();
+    // Draw the map, scaling up to our zoom level.
+    {
+        QRectF r = event->rect();
+        QRectF src( r.x()/mZoom, r.y()/mZoom, r.width()/mZoom, r.height()/mZoom);
+        painter.drawImage(r, mBacking, src);
+    }
 
-    // Scale the map up to our zoom level as we draw it.
-    QRect src( r.x()/mZoom, r.y()/mZoom, r.width()/mZoom, r.height()/mZoom);
-    painter.drawImage(r, mBacking, src);
+    // Draw cursor.
+    if(mCursorOn) {
+        QRect r = MapRectToWidget(mCursor);
+        QPen whitePen(Qt::green,1);
+        painter.setPen(whitePen);
+        painter.drawRect(r);
+
+        QPen blackPen(Qt::black,1);
+        painter.setPen(blackPen);
+        painter.drawRect(r.adjusted(1,1,-1,-1));
+        painter.drawRect(r.adjusted(-1,-1,1,1));
+    }
+
 }
 

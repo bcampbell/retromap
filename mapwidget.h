@@ -4,15 +4,20 @@
 
 #include <QtWidgets/QWidget>
 #include <QImage>
+
 #include "proj.h"
-#include "editor.h"
+#include "mapview.h"
 
 class Tool;
 class MapEditor;
 
-// View part of MVP
-
-class MapWidget : public QWidget {
+// Implements the View part of MVP.
+// Handles rendering of map and overlayed stuff like cursors.
+// Also handles the initial layer of input, but delgates most input events
+// down to the Presenter layer.
+// The Presenter layer calls back to the view when the map changes, or to
+// update cursors.
+class MapWidget : public QWidget, public MapView {
     Q_OBJECT
 
 public:
@@ -21,10 +26,11 @@ public:
     virtual ~MapWidget();
 
     // MapView methods
-    void SetPresenter(MapEditor* presenter);
-    void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
-    void MapModified(MapRect const& dirty);
-    void SetCursor(MapRect const& area);
+    virtual void SetPresenter(MapEditor* presenter);
+    virtual void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
+    virtual void MapModified(MapRect const& dirty);
+    virtual void SetCursor(MapRect const& area);
+    virtual void HideCursor();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -42,8 +48,10 @@ private:
     QImage mBacking;
     int mZoom{3};
 
+    bool mCursorOn{false};
     MapRect mCursor;
 
+    QRect MapRectToWidget(MapRect const& r);
     void UpdateBacking(MapRect const& dirty);
     bool IsValidMap() const {return mTilemap && mCharset && mPalette;}
 };

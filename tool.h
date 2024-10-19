@@ -6,6 +6,7 @@ struct PixPoint;
 struct TilePoint;
 struct Cell;
 struct Proj;
+class MapView;
 
 class Tool
 {
@@ -19,9 +20,10 @@ public:
         RIGHT = 0x02,
     };
 
-    virtual void Press(int mapNum, PixPoint const& pos, int b) {}
-    virtual void Move(int mapNum, PixPoint const& pos, int b) {}
-    virtual void Release(int mapNum, PixPoint const& pos, int b) {}
+    // TODO: could get mapNum from view?
+    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Release(MapView* view,int mapNum, PixPoint const& pos, int b) {}
 protected:
     Editor& mEd;
     Proj& mProj;
@@ -35,9 +37,9 @@ public:
     DrawTool(Editor& ed) : Tool(ed) {}
     virtual ~DrawTool() {}
 
-    virtual void Press(int mapNum, PixPoint const& pos, int b);
-    virtual void Move(int mapNum, PixPoint const& pos, int b);
-    virtual void Release(int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
 private:
     TilePoint mPrevPos;
     void Plonk(int mapNum, TilePoint const& tp, Cell const& pen);

@@ -17,14 +17,14 @@ MapEditor::~MapEditor()
     }
 }
 
-void MapEditor::AddView(MapWidget* view)
+void MapEditor::AddView(MapView* view)
 {
     mViews.insert(view);
     view->SetPresenter(this);
     view->SetMap(&mProj.maps[mCurMap], &mProj.charset, &mProj.palette);
 }
 
-void MapEditor::RemoveView(MapWidget* view)
+void MapEditor::RemoveView(MapView* view)
 {
     view->SetPresenter(nullptr);
     view->SetMap(nullptr, nullptr, nullptr);
@@ -76,18 +76,24 @@ void MapEditor::ProjCharsetModified()
 }
 
 
-void MapEditor::Press(PixPoint const& pt, int button)
+void MapEditor::Press(MapView* view, PixPoint const& pt, int button)
 {
-    mTool->Press(mCurMap, pt, button);
+    int tw = mProj.charset.tw;
+    int th = mProj.charset.th;
+    mTool->Press(view, mCurMap, pt, button);
 }
 
-void MapEditor::Move(PixPoint const& pt, int button)
+void MapEditor::Move(MapView* view, PixPoint const& pt, int button)
 {
-    mTool->Move(mCurMap, pt, button);
+    int tw = mProj.charset.tw;
+    int th = mProj.charset.th;
+    mTool->Move(view, mCurMap, pt, button);
 }
 
-void MapEditor::Release(PixPoint const& pt, int button)
+void MapEditor::Release(MapView* view, PixPoint const& pt, int button)
 {
-    mTool->Release(mCurMap, pt, button);
+    int tw = mProj.charset.tw;
+    int th = mProj.charset.th;
+    mTool->Release(view, mCurMap, pt, button);
 }
 

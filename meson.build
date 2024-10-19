@@ -13,6 +13,7 @@ my_headers = [
   'mainwindow.h',
   'mapeditor.h',
   'mapsizedialog.h',
+  'mapview.h',
   'mapwidget.h',
   'palettewidget.h',
   'penwidget.h',
