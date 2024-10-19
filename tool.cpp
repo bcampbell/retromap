@@ -10,24 +10,35 @@ void DrawTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
     TilePoint tp = mProj.ToTilePoint(pos);
     mPrevPos = tp;
     Tilemap& map = mProj.maps[mapNum];
+
+    if (!mCmd) {
+        mCmd = new MapDrawCmd(mEd, mapNum);
+    }
+
+
     if (!map.IsValid(tp)) {
         return;
     }
 
     if (b & LEFT) {
-        Plonk(mapNum, tp, mEd.leftPen);
+        mCmd->Plonk(tp, mEd.leftPen);
     }
     if (b & RIGHT) {
-        Plonk(mapNum, tp, mEd.rightPen);
+        mCmd->Plonk(tp, mEd.rightPen);
     }
 }
 
 void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
 {
+
     //printf("Move\n");
     TilePoint tp = mProj.ToTilePoint(pos);
 
     view->SetCursor(MapRect(tp,1,1));
+
+    if (!mCmd) {
+        return;
+    }
 
     Tilemap& map = mProj.maps[mapNum];
     if (!map.IsValid(tp)) {
@@ -40,10 +51,10 @@ void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
     mPrevPos = tp;
 
     if (b & LEFT) {
-        Plonk(mapNum, tp, mEd.leftPen);
+        mCmd->Plonk(tp, mEd.leftPen);
     }
     if (b & RIGHT) {
-        Plonk(mapNum, tp, mEd.rightPen);
+        mCmd->Plonk(tp, mEd.rightPen);
     }
 }
 
@@ -52,14 +63,15 @@ void DrawTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
     //printf("Release\n");
     TilePoint tp = mProj.ToTilePoint(pos);
     Tilemap& map = mProj.maps[mapNum];
+
+    if (mCmd) {
+        mCmd->Commit(); // no more drawing.
+        mEd.AddCmd(mCmd);
+        mCmd = nullptr;
+    }
+
     if (!map.IsValid(tp)) {
         return;
     }
-}
-
-void DrawTool::Plonk(int mapNum, TilePoint const& tp, Cell const& pen)
-{
-    PlonkCmd* cmd = new PlonkCmd(mEd, mapNum, tp, pen);
-    mEd.AddCmd(cmd);
 }
 

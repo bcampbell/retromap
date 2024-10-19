@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <cassert>
 
 struct Cell {
     uint16_t tile{0};
@@ -38,8 +39,18 @@ struct PixPoint : public Point
 struct MapRect
 {
     TilePoint pos;
-    int w;
-    int h;
+    int w{0};
+    int h{0};
+    bool IsEmpty() const {return w == 0 && h == 0;}
+    void Translate(TilePoint const& delta)
+        {pos.x += delta.x; pos.y += delta.y;}
+    void Merge(MapRect const& other);
+    void Merge(TilePoint const& point);
+    bool Contains(TilePoint const& point) const
+    {
+        return point.x >= pos.x && point.x < pos.x + w &&
+            point.y >= pos.y && point.y < pos.y + h;
+    }
 };
 
 struct Tilemap
@@ -49,19 +60,32 @@ struct Tilemap
     std::vector<Cell> cells;
 
     bool IsValid(TilePoint const& tp) const {
-        return (tp.x >= 0 && tp.x < w && tp.y >= 0 && tp.y < h);
+        return Bounds().Contains(tp);
     }
     Cell& CellAt(TilePoint const& tp) {
+        assert(Bounds().Contains(tp));
         return cells[(tp.y * w) + tp.x];
     };
     const Cell& CellAt(TilePoint const& tp) const {
+        assert(Bounds().Contains(tp));
         return cells[(tp.y * w) + tp.x];
     };
 
+    Cell* CellPtr(TilePoint const& tp) {
+        assert(Bounds().Contains(tp));
+        return &cells[(tp.y * w) + tp.x];
+    };
+    Cell const* CellPtrConst(TilePoint const& tp) const {
+        assert(Bounds().Contains(tp));
+        return &cells[(tp.y * w) + tp.x];
+    };
+
     // Return a bounding rect for the map.
-    const MapRect Bounds() const {
+    MapRect Bounds() const {
         return MapRect(TilePoint(0, 0), w, h);
     }
+
+    Tilemap Copy(MapRect const& r) const;
 };
 
 struct Charset

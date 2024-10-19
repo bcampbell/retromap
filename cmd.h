@@ -18,19 +18,23 @@ protected:
     CmdState mState;
 };
 
-
-class PlonkCmd : public Cmd
+class MapDrawCmd : public Cmd
 {
 public:
-    PlonkCmd() = delete;
-    PlonkCmd(Editor& ed, int mapNum, TilePoint const& tp, Cell const& pen) :
-        Cmd(ed), mMapNum(mapNum), mPos(tp), mPen(pen) {}
+    MapDrawCmd() = delete;
+    MapDrawCmd(Editor& ed, int mapNum);
+
+    void Plonk(TilePoint const& pos, Cell const& cell);
+    void Commit();  // no more plonking!
+
     virtual void Do();
     virtual void Undo();
 private:
+    void Swap();
     int mMapNum;
-    TilePoint mPos;
-    Cell mPen;
+    TilePoint mBackupPos;   // position of mBackup upon map
+    Tilemap mBackup;
+    MapRect mDamageExtent;
 };
 
 

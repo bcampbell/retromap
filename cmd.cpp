@@ -3,29 +3,84 @@
 #include <cassert>
 #include <algorithm>
 
-void PlonkCmd::Do()
+MapDrawCmd::MapDrawCmd(Editor& ed, int mapNum) :
+    Cmd(ed, DONE),
+    mMapNum(mapNum)
 {
     Proj& proj = mEd.proj;
     Tilemap& map = proj.maps[mMapNum];
-    assert(map.IsValid(mPos));
+    mDamageExtent = MapRect(TilePoint(0,0),0,0);
+    mBackup = map;
+}
 
-    // swap em.
-    Cell tmp = map.CellAt(mPos);
-    map.CellAt(mPos) = mPen;
-    mPen = tmp;
 
+
+
+void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
+{
+    assert(State() == DONE);
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+
+    assert(map.Bounds().Contains(pos));
+    map.CellAt(pos) = cell;
     mEd.modified = true;
-    MapRect dirty(mPos, 1, 1);
+    MapRect dirty(pos, 1, 1);
+    mDamageExtent.Merge(dirty);
     for (auto l : mEd.listeners) {
         l->ProjMapModified(mMapNum, dirty);
     }
+}
+
+void MapDrawCmd::Commit()
+{
+    // Trim down saved area to just that which was changed.
+    // Just so we don't save a copy of the whole map for every edit!
+    assert(State() == DONE);
+    mBackupPos = mDamageExtent.pos;
+    mBackup = mBackup.Copy(mDamageExtent);
+}
+
+void MapDrawCmd::Do()
+{
+    Swap();
     mState = DONE;
 }
 
-void PlonkCmd::Undo()
+void MapDrawCmd::Undo()
 {
-    Do();
+    Swap();
     mState = NOT_DONE;
+}
+
+void MapDrawCmd::Swap()
+{
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+
+    MapRect r = mBackup.Bounds();
+    TilePoint liveRowStart(mBackupPos);
+    TilePoint backupRowStart(0, 0);
+    for (int y = 0; y < r.h; ++y) {
+        Cell* live = map.CellPtr(liveRowStart);
+        Cell* backup = mBackup.CellPtr(backupRowStart);
+        //Cell* backup = mBackup.CellPtr(TilePoint(0,y));
+        for (int x = 0; x < r.w; ++x) {
+            Cell tmp = *live;
+            *live = *backup;
+            *backup = tmp;
+            //std::swap(*live, *backup);
+            ++live;
+            ++backup;
+        }
+        ++liveRowStart.y;
+        ++backupRowStart.y;
+    }
+    MapRect affected(mBackup.Bounds());
+    affected.Translate(mBackupPos);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, affected);
+    }
 }
 
 

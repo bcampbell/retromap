@@ -7,6 +7,7 @@ struct TilePoint;
 struct Cell;
 struct Proj;
 class MapView;
+class MapDrawCmd;
 
 class Tool
 {
@@ -42,6 +43,7 @@ public:
     virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
 private:
     TilePoint mPrevPos;
-    void Plonk(int mapNum, TilePoint const& tp, Cell const& pen);
+    MapDrawCmd* mCmd{nullptr};
+    //void Plonk(int mapNum, TilePoint const& tp, Cell const& pen);
 };
 

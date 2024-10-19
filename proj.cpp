@@ -1,6 +1,49 @@
 #include "proj.h"
 
 
+void MapRect::Merge(MapRect const& other) {
+    if (IsEmpty()) {
+        *this = other;
+        return;
+    }
+    int xmin = std::min(pos.x, other.pos.x);
+    int xmax = std::max(pos.x + w, other.pos.x + other.w);
+    int ymin = std::min(pos.y, other.pos.y);
+    int ymax = std::max(pos.y + h, other.pos.y + other.h);
+
+    pos.x = xmin;
+    pos.y = ymin;
+    w = xmax-xmin;
+    h = ymax-ymin;
+}
+
+void MapRect::Merge(TilePoint const& point)
+{
+    Merge(MapRect(point,1,1));
+}
+
+Tilemap Tilemap::Copy(MapRect const& r) const
+{
+    Tilemap out;
+    out.w = r.w;
+    out.h = r.h;
+    out.cells.resize(r.w * r.h);
+    TilePoint srcRowStart(r.pos);
+    TilePoint destRowStart(0, 0);
+    for (int y = 0; y < r.h; ++y) {
+        Cell const* src = CellPtrConst(srcRowStart);
+        Cell* dest = out.CellPtr(destRowStart);
+        //Cell* backup = mBackup.CellPtr(TilePoint(0,y));
+        for (int x = 0; x < r.w; ++x) {
+            *dest++ = *src++;
+        }
+        ++srcRowStart.y;
+        ++destRowStart.y;
+    }
+    return out;
+}
+
+
 static void PushU16LE(std::vector<uint8_t>& out, uint16_t v) {
     out.push_back(v & 0xFF);
     out.push_back(v >> 8);
