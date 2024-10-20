@@ -2,6 +2,7 @@
 #include "editor.h"
 #include "proj.h"
 #include "helpers.h"
+#include "tool.h"
 
 
 Editor::Editor()
@@ -9,11 +10,14 @@ Editor::Editor()
     leftPen = {1,1,0};
     rightPen = {32,0,0};
     InitProj(&proj);
+    tool = new PickupTool(*this);
 }
 
 
 Editor::~Editor()
 {
+    delete tool;
+    tool = nullptr;
     while(!undoStack.empty()) {
         delete undoStack.back();
         undoStack.pop_back();
@@ -23,6 +27,28 @@ Editor::~Editor()
         redoStack.pop_back();
     }
 }
+
+void Editor::SetTool(int toolKind)
+{
+    Tool* newTool = nullptr;
+    switch(toolKind) {
+        case TOOL_DRAW: newTool = new DrawTool(*this); break;
+        case TOOL_PICKUP: newTool = new PickupTool(*this); break;
+//        case TOOL_BRUSH: newTool = new BrushTool(*this); break;
+        default:
+            assert(false);  // bad tool.
+            return;
+    }
+
+    tool->Reset();
+    delete tool;
+    tool = newTool;
+
+    for (auto l : listeners) {
+        l->EditorToolChanged();
+    }
+}
+
 
 
 // Adds a command to the undo stack, and calls its Do() fn

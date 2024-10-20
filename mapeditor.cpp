@@ -5,7 +5,6 @@
 MapEditor::MapEditor(Editor& ed) : mEd(ed), mProj(ed.proj)
 {
     SetCurrentMap(0);
-    mTool = new DrawTool(ed);
     ed.listeners.insert(this);
 }
 
@@ -80,20 +79,20 @@ void MapEditor::Press(MapView* view, PixPoint const& pt, int button)
 {
     int tw = mProj.charset.tw;
     int th = mProj.charset.th;
-    mTool->Press(view, mCurMap, pt, button);
+    mEd.tool->Press(view, mCurMap, pt, button);
 }
 
 void MapEditor::Move(MapView* view, PixPoint const& pt, int button)
 {
     int tw = mProj.charset.tw;
     int th = mProj.charset.th;
-    mTool->Move(view, mCurMap, pt, button);
+    mEd.tool->Move(view, mCurMap, pt, button);
 }
 
 void MapEditor::Release(MapView* view, PixPoint const& pt, int button)
 {
     int tw = mProj.charset.tw;
     int th = mProj.charset.th;
-    mTool->Release(view, mCurMap, pt, button);
+    mEd.tool->Release(view, mCurMap, pt, button);
 }
 

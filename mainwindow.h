@@ -24,7 +24,7 @@ public:
     virtual ~MainWindow();
 
     // EditListener
-    virtual void ProjPenChanged();
+    virtual void EditorPenChanged();
     virtual void ProjCharsetModified();
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
     virtual void ProjMapsInserted(int mapNum, int count);

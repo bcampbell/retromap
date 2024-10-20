@@ -18,7 +18,7 @@ public:
     virtual ~PenWidget();
 
     // EditListener...
-    void ProjPenChanged() {update();}
+    void EditorPenChanged() {update();}
 protected:
     void paintEvent(QPaintEvent *event);
 //    void resizeEvent(QResizeEvent *event);

@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
     QApplication app (argc, argv);
 
-    std::vector<Editor> editors;
+    std::vector<Editor*> editors;
 
     auto args = app.arguments();
     for (int i = 1; i < args.size(); ++i) {
@@ -17,22 +17,32 @@ int main(int argc, char **argv)
             printf("ERROR: failed to load %s\n", args.at(i).toStdString().c_str());
             continue;
         }
-        editors.push_back(Editor());
-        editors.back().proj = proj;
-        editors.back().mapFilename = args.at(i).toStdString();
+        Editor* ed = new Editor();
+        ed->proj = proj;
+        ed->mapFilename = args.at(i).toStdString();
+        editors.push_back(ed);
     }
     if(editors.empty()) {
         // blank
-        editors.push_back(Editor());
+        Editor* ed = new Editor();
+        editors.push_back(ed);
     }
 
-    for (auto& ed : editors) {
-        MainWindow *fenster = new MainWindow(nullptr, ed);
+    for (auto ed : editors) {
+        MainWindow *fenster = new MainWindow(nullptr, *ed);
         fenster->show();
-        // cleanup or not?
+
+        // TODO: need to clean up fenster?
     }
 
-    return app.exec();
+    auto status = app.exec();
+
+    // cleanup.
+    for (auto ed : editors) {
+        delete ed;
+    }
+
+    return status;
 }
 
 

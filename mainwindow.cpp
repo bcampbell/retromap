@@ -196,14 +196,14 @@ void MainWindow::createWidgets()
     connect(mCharsetWidget, &CharsetWidget::leftChanged, this, [self=this](int tile) {
         self->mEd.leftPen.tile = tile;
         for (auto l : self->mEd.listeners) {
-            l->ProjPenChanged();
+            l->EditorPenChanged();
         }
     });
 
     connect(mCharsetWidget, &CharsetWidget::rightChanged, this, [self=this](int tile) {
         self->mEd.rightPen.tile = tile;
         for (auto l : self->mEd.listeners) {
-            l->ProjPenChanged();
+            l->EditorPenChanged();
         }
     });
 
@@ -211,13 +211,13 @@ void MainWindow::createWidgets()
     connect(mPaletteWidget, &PaletteWidget::leftChanged, this, [self=this](int ink){
         self->mEd.leftPen.ink = ink;
         for (auto l : self->mEd.listeners) {
-            l->ProjPenChanged();
+            l->EditorPenChanged();
         }
     });
     connect(mPaletteWidget, &PaletteWidget::rightChanged, this, [self=this](int ink){
         self->mEd.rightPen.ink = ink;
         for (auto l : self->mEd.listeners) {
-            l->ProjPenChanged();
+            l->EditorPenChanged();
         }
     });
 }
@@ -361,7 +361,7 @@ void MainWindow::prevMap()
 }
 
 // EditListener
-void MainWindow::ProjPenChanged()
+void MainWindow::EditorPenChanged()
 {
 }
 

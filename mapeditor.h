@@ -4,7 +4,8 @@
 
 class MapView;
 struct Proj;
-class Tool;
+
+
 
 // MapEditor is Presenter part of MVP
 class MapEditor : public EditListener {
@@ -13,6 +14,7 @@ public:
     MapEditor() = delete;
 	MapEditor(Editor& ed);
     ~MapEditor();
+
 
     // set which map we're looking at
     void AddView(MapView* view);
@@ -35,7 +37,6 @@ private:
     Editor& mEd;
     std::set<MapView*> mViews;
     Proj& mProj;
-    Tool* mTool{nullptr};
     int mCurMap{0};
 };
 

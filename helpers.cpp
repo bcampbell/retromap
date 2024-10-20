@@ -123,7 +123,7 @@ void InitProj(Proj* proj)
     proj->maps.push_back(map);
 
     if (!ImportCharset("c64charset.png", proj->charset, 8, 8)) {
-        printf("Poop. load fail.\n");
+        //printf("Poop. load fail.\n");
         Charset& t = proj->charset;
         t.tw = 8;
         t.th = 8;

@@ -4,6 +4,7 @@
 #include <string>
 #include <set>
 #include "proj.h"
+#include "tool.h"
 
 class Cmd;
 
@@ -11,7 +12,8 @@ class EditListener
 {
 public:
     virtual ~EditListener() = default;
-    virtual void ProjPenChanged() {};
+    virtual void EditorPenChanged() {};
+    virtual void EditorToolChanged() {};
     virtual void ProjCharsetModified() {};
     virtual void ProjMapModified(int mapNum, MapRect const& dirty) {};
     // Assume everything changed.
@@ -43,9 +45,13 @@ public:
     Cell leftPen;
     Cell rightPen;
 
+    Tool* tool{nullptr};
+
     void AddCmd(Cmd* cmd);
     void Undo();
     void Redo();
+
+    void SetTool(int toolKind);
 };
 
 
