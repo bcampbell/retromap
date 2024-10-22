@@ -22,6 +22,17 @@ void MapRect::Merge(TilePoint const& point)
     Merge(MapRect(point,1,1));
 }
 
+MapRect MapRect::Clip(MapRect const& r) const
+{
+    int left = std::max(0, r.pos.x);
+    int right = std::min(w, r.pos.x + r.w);
+    int top = std::max(0, r.pos.y);
+    int bottom = std::min(h, r.pos.y + r.h);
+
+    return MapRect(TilePoint(left,top), right - left, bottom - top);
+}
+
+
 Tilemap Tilemap::Copy(MapRect const& r) const
 {
     Tilemap out;

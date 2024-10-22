@@ -45,7 +45,7 @@ class DrawTool : public Tool
 {
 public:
     DrawTool() = delete;
-    DrawTool(Editor& ed) : Tool(ed) {printf("drawtool\n");}
+    DrawTool(Editor& ed) : Tool(ed) {}
     virtual ~DrawTool() {}
 
     virtual int Kind() const {return TOOL_DRAW;}
@@ -64,7 +64,7 @@ class PickupTool : public Tool
 {
 public:
     PickupTool() = delete;
-    PickupTool(Editor& ed) : Tool(ed) {printf("pickuptool\n");}
+    PickupTool(Editor& ed) : Tool(ed) {}
     virtual ~PickupTool() {}
 
     virtual int Kind() const {return TOOL_PICKUP;}
@@ -73,7 +73,8 @@ public:
     virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
-    int mLatch;
+    int mLatch{0};
     TilePoint mAnchor;
+    MapRect mSelection;
 };
 

@@ -14,6 +14,7 @@ public:
     virtual ~EditListener() = default;
     virtual void EditorPenChanged() {};
     virtual void EditorToolChanged() {};
+    virtual void EditorBrushChanged() {};
     virtual void ProjCharsetModified() {};
     virtual void ProjMapModified(int mapNum, MapRect const& dirty) {};
     // Assume everything changed.
@@ -41,9 +42,13 @@ public:
 	std::vector<Cmd*> undoStack;
 	std::vector<Cmd*> redoStack;
 
-    // TODO: move this out into editor window.
+    // Custom brush (0x0 = none)
+    Tilemap brush;
+
+    // TODO: move these out into editor window?
     Cell leftPen;
     Cell rightPen;
+    bool useBrush{false};   // use brush for drawing?
 
     Tool* tool{nullptr};
 

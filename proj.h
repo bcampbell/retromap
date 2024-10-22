@@ -51,6 +51,7 @@ struct MapRect
         return point.x >= pos.x && point.x < pos.x + w &&
             point.y >= pos.y && point.y < pos.y + h;
     }
+    MapRect Clip(MapRect const& r) const;
 };
 
 struct Tilemap

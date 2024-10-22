@@ -16,6 +16,9 @@
 #include <QMessageBox>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QActionGroup>
+#include <QToolBar>
+#include <QToolButton>
 
 MainWindow::MainWindow(QWidget *parent, Editor& ed)
     : QMainWindow(parent), mEd(ed), mPresenter(ed)
@@ -108,6 +111,43 @@ void MainWindow::createActions()
     mActions.prevMap = new QAction(tr("Previous map"), this);
     mActions.prevMap->setShortcut(QKeySequence(Qt::Key_Left));
     connect(mActions.prevMap, &QAction::triggered, this, &MainWindow::prevMap);
+
+    // Tools
+
+    {
+        QActionGroup *toolGroup = new QActionGroup(this);
+        QAction* a;
+
+        mActions.drawTool = a = new QAction(tr("Draw"), toolGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_D));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.SetTool(TOOL_DRAW);
+        });
+
+        mActions.pickupTool = a = new QAction(tr("Pick up brush"), toolGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_B));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.SetTool(TOOL_PICKUP);
+        });
+    }
+
+    {
+        QActionGroup *brushGroup = new QActionGroup(this);
+        QAction* a;
+
+        mActions.useCustomBrush = a = new QAction(tr("Use Brush"), brushGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_Period));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.useBrush = !self->mEd.useBrush;
+            for (auto l : self->mEd.listeners) {
+                l->EditorBrushChanged();
+            }
+        });
+    }
+
 }
 
 
@@ -128,6 +168,11 @@ void MainWindow::createMenus()
         QMenu* m = new QMenu(tr("&Edit"), this);
         m->addAction(mActions.undo);
         m->addAction(mActions.redo);
+        m->addSeparator();
+        m->addAction(mActions.drawTool);
+        m->addAction(mActions.pickupTool);
+        m->addSeparator();
+        m->addAction(mActions.useCustomBrush);
         menuBar()->addMenu(m);
     }
     {
@@ -178,6 +223,11 @@ void MainWindow::createWidgets()
     QVBoxLayout *h = new QVBoxLayout();
     {
         QVBoxLayout *v = new QVBoxLayout();
+
+        QToolBar *toolbar = new QToolBar(this);
+        toolbar->addAction(mActions.drawTool);
+        toolbar->addAction(mActions.pickupTool);
+        v->addWidget(toolbar, Qt::AlignLeading);
         v->addWidget(mPenWidget, Qt::AlignLeading);
         v->addWidget(mPaletteWidget, Qt::AlignLeading);
         h->addLayout(v);
@@ -363,6 +413,29 @@ void MainWindow::prevMap()
 // EditListener
 void MainWindow::EditorPenChanged()
 {
+}
+
+void MainWindow::EditorBrushChanged()
+{
+    mActions.useCustomBrush->setChecked(mEd.useBrush);
+}
+
+
+void MainWindow::EditorToolChanged()
+{
+    int kind = mEd.tool->Kind();
+    switch (kind) {
+    case TOOL_DRAW:
+        if (!mActions.drawTool->isChecked()) {
+            mActions.drawTool->setChecked(true);
+        }
+        break;
+    case TOOL_PICKUP:
+        if (mActions.pickupTool->isChecked()) {
+            mActions.pickupTool->setChecked(true);
+        }
+        break;
+    }
 }
 
 // EditListener

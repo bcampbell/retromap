@@ -13,9 +13,6 @@ MapDrawCmd::MapDrawCmd(Editor& ed, int mapNum) :
     mBackup = map;
 }
 
-
-
-
 void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
 {
     assert(State() == DONE);
@@ -24,6 +21,7 @@ void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
 
     assert(map.Bounds().Contains(pos));
     map.CellAt(pos) = cell;
+    // Tell everyone.
     mEd.modified = true;
     MapRect dirty(pos, 1, 1);
     mDamageExtent.Merge(dirty);
@@ -31,6 +29,73 @@ void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
         l->ProjMapModified(mMapNum, dirty);
     }
 }
+
+void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent)
+{
+    assert(State() == DONE);
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+
+    // clip brush area on map
+    MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
+    // transform clipped area into brush space
+    MapRect srcRect = destRect;
+    srcRect.pos.x -= destRect.pos.x;
+    srcRect.pos.y -= destRect.pos.y;
+
+    // copy
+    for (int y=0; y<srcRect.h; ++y) {
+        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
+        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        for (int x=0; x<srcRect.w; ++x) {
+            Cell c = *src++;
+            if (c.tile != transparent.tile) {
+                *dest = c;
+            }
+            ++dest;
+        }
+    }
+    // Tell everyone.
+    mEd.modified = true;
+    mDamageExtent.Merge(destRect);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, destRect);
+    }
+}
+
+void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent)
+{
+    assert(State() == DONE);
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+
+    // clip brush area on map
+    MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
+    // transform clipped area into brush space
+    MapRect srcRect = destRect;
+    srcRect.pos.x -= destRect.pos.x;
+    srcRect.pos.y -= destRect.pos.y;
+
+    // copy
+    for (int y=0; y<srcRect.h; ++y) {
+        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
+        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        for (int x=0; x<srcRect.w; ++x) {
+            Cell c = *src++;
+            if (c.tile != transparent.tile) {
+                *dest = transparent;
+            }
+            ++dest;
+        }
+    }
+    // Tell everyone.
+    mEd.modified = true;
+    mDamageExtent.Merge(destRect);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, destRect);
+    }
+}
+
 
 void MapDrawCmd::Commit()
 {

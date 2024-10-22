@@ -24,7 +24,10 @@ public:
     MapDrawCmd() = delete;
     MapDrawCmd(Editor& ed, int mapNum);
 
+    // Add changes to cmd, applied immediately.
     void Plonk(TilePoint const& pos, Cell const& cell);
+    void DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent);
+    void EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent);
     void Commit();  // no more plonking!
 
     virtual void Do();

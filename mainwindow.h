@@ -25,6 +25,8 @@ public:
 
     // EditListener
     virtual void EditorPenChanged();
+    virtual void EditorBrushChanged();
+    virtual void EditorToolChanged();
     virtual void ProjCharsetModified();
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
     virtual void ProjMapsInserted(int mapNum, int count);
@@ -66,6 +68,10 @@ private:
        QAction* prevMap{nullptr};
        QAction* undo{nullptr};
        QAction* redo{nullptr};
+       QAction* drawTool{nullptr};
+       QAction* pickupTool{nullptr};
+       QAction* rectTool{nullptr};
+       QAction* useCustomBrush{nullptr};
     } mActions;
 
 };
