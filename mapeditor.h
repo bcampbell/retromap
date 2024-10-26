@@ -22,6 +22,9 @@ public:
     void SetCurrentMap(int mapNum);
     int CurrentMap() {return mCurMap;}
 
+    void MapNavLinear(int delta);
+    void MapNav2D(int dx, int dy);
+
     // Called by view
     void Press(MapView* view, PixPoint const& pt, int button);
     void Move(MapView* view, PixPoint const& pt, int button);

@@ -41,12 +41,12 @@ private slots:
     bool saveAs();
     void help();
     void addMap();
-    void nextMap();
-    void prevMap();
 private:
     void createActions();
     void createMenus();
     bool maybeSave();
+
+    void RethinkTitle();
 
     // The editor state
     Editor& mEd;
@@ -64,8 +64,12 @@ private:
        QAction* exit{nullptr};
        QAction* help{nullptr};
        QAction* addMap{nullptr};
-       QAction* nextMap{nullptr};
-       QAction* prevMap{nullptr};
+       QAction* mapNext{nullptr};
+       QAction* mapPrev{nullptr};
+       QAction* mapNorth{nullptr};
+       QAction* mapSouth{nullptr};
+       QAction* mapWest{nullptr};
+       QAction* mapEast{nullptr};
        QAction* undo{nullptr};
        QAction* redo{nullptr};
        QAction* drawTool{nullptr};

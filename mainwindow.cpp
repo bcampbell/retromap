@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent, Editor& ed)
     createActions();
     createMenus();
     createWidgets();
-    setWindowTitle(tr("Retromap"));
+    RethinkTitle();
     resize(500, 500);
 
     mPresenter.AddView(mMapWidget);
@@ -49,6 +49,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->ignore();
 }
 
+void MainWindow::RethinkTitle()
+{
+    QString t = QString("Retromap map %1/%2 - %3")
+        .arg(mPresenter.CurrentMap())
+        .arg((int)mEd.proj.maps.size())
+        .arg(QString::fromStdString(mEd.mapFilename));
+    setWindowTitle(t);
+}
 
 bool MainWindow::maybeSave()
 {
@@ -72,13 +80,18 @@ void MainWindow::createActions()
     mActions.importCharset = new QAction(tr("&Import charset..."), this);
     connect(mActions.importCharset, &QAction::triggered, this, &MainWindow::importCharset);
 
-    mActions.undo = new QAction(tr("&Undo"), this);
-    mActions.undo->setShortcuts(QKeySequence::Undo);
-    connect(mActions.undo, &QAction::triggered, this, [self=this]() {self->mEd.Undo();});
+    {
+        QAction* a;
+        a = new QAction(tr("&Undo"), this);
+        a->setShortcuts(QKeySequence::Undo);
+        connect(a, &QAction::triggered, [&]() {mEd.Undo(); RethinkTitle();});
+        mActions.undo = a;
 
-    mActions.redo = new QAction(tr("&Redo"), this);
-    mActions.redo->setShortcuts(QKeySequence::Redo);
-    connect(mActions.redo, &QAction::triggered, this, [self=this]() {self->mEd.Redo();});
+        a = new QAction(tr("&Redo"), this);
+        a->setShortcuts(QKeySequence::Redo);
+        connect(a, &QAction::triggered, [&]() {mEd.Redo(); RethinkTitle();});
+        mActions.redo = a;
+    }
 
     mActions.open = new QAction(tr("&Open map..."), this);
     mActions.open->setShortcuts(QKeySequence::Open);
@@ -104,13 +117,54 @@ void MainWindow::createActions()
     mActions.addMap->setShortcut(QKeySequence(Qt::Key_A));
     connect(mActions.addMap, &QAction::triggered, this, &MainWindow::addMap);
 
-    mActions.nextMap = new QAction(tr("Next map"), this);
-    mActions.nextMap->setShortcut(QKeySequence(Qt::Key_Right));
-    connect(mActions.nextMap, &QAction::triggered, this, &MainWindow::nextMap);
+    // navigate around maps
+    {
+        QAction* a;
+        a = new QAction(tr("North"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Up));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNav2D(0, -1);
+            RethinkTitle();
+        });
+        mActions.mapNorth = a;
+        
+        a = new QAction(tr("South"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Down));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNav2D(0, 1);
+            RethinkTitle();
+        });
+        mActions.mapSouth = a;
 
-    mActions.prevMap = new QAction(tr("Previous map"), this);
-    mActions.prevMap->setShortcut(QKeySequence(Qt::Key_Left));
-    connect(mActions.prevMap, &QAction::triggered, this, &MainWindow::prevMap);
+        a = new QAction(tr("West"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Left));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNav2D(-1, 0);
+            RethinkTitle();
+        });
+        mActions.mapWest = a;
+
+        a = new QAction(tr("East"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Right));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNav2D(1, 0); RethinkTitle();
+        });
+        mActions.mapEast = a;
+
+        a = new QAction(tr("Next"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Plus));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNavLinear(1); RethinkTitle();
+        });
+        mActions.mapNext = a;
+
+        a = new QAction(tr("Previous"), this);
+        a->setShortcut(QKeySequence(Qt::Key_Minus));
+        connect(a, &QAction::triggered, [&](){
+            mPresenter.MapNavLinear(-1); RethinkTitle();
+        });
+        mActions.mapPrev = a;
+    }    
 
     // Tools
 
@@ -177,8 +231,12 @@ void MainWindow::createMenus()
     }
     {
         QMenu* m = new QMenu(tr("&Map"), this);
-        m->addAction(mActions.nextMap);
-        m->addAction(mActions.prevMap);
+        m->addAction(mActions.mapNext);
+        m->addAction(mActions.mapPrev);
+        m->addAction(mActions.mapNorth);
+        m->addAction(mActions.mapSouth);
+        m->addAction(mActions.mapWest);
+        m->addAction(mActions.mapEast);
         m->addSeparator();
         m->addAction(mActions.addMap);
         menuBar()->addMenu(m);
@@ -392,22 +450,7 @@ void MainWindow::addMap()
     InsertMapsCmd* cmd = new InsertMapsCmd(mEd, {map}, n);
     mEd.AddCmd(cmd);
     mPresenter.SetCurrentMap(n);
-}
-
-void MainWindow::nextMap()
-{
-    int n = mPresenter.CurrentMap() + 1;
-    if (n < (int)mEd.proj.maps.size()) {
-        mPresenter.SetCurrentMap(n);
-    }
-}
-
-void MainWindow::prevMap()
-{
-    int n = mPresenter.CurrentMap() - 1;
-    if (n >= 0) {
-        mPresenter.SetCurrentMap(n);
-    }
+    RethinkTitle();
 }
 
 // EditListener
