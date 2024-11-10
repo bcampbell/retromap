@@ -117,6 +117,11 @@ void MainWindow::createActions()
     mActions.addMap->setShortcut(QKeySequence(Qt::Key_A));
     connect(mActions.addMap, &QAction::triggered, this, &MainWindow::addMap);
 
+    mActions.resizeMap = new QAction(tr("Resize map..."), this);
+//    mActions.resizeMap->setShortcut(QKeySequence(Qt::Key_));
+    connect(mActions.resizeMap, &QAction::triggered, this, &MainWindow::resizeMap);
+
+
     // navigate around maps
     {
         QAction* a;
@@ -239,6 +244,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.mapEast);
         m->addSeparator();
         m->addAction(mActions.addMap);
+        m->addAction(mActions.resizeMap);
         menuBar()->addMenu(m);
     }
     {
@@ -452,6 +458,21 @@ void MainWindow::addMap()
     mPresenter.SetCurrentMap(n);
     RethinkTitle();
 }
+
+void MainWindow::resizeMap()
+{
+    int mapNum = mPresenter.CurrentMap();
+    Tilemap& cur = mEd.proj.maps[mapNum];
+    MapSizeDialog dlg(this, cur.w, cur.h);
+    if (dlg.exec() != QDialog::Accepted) {
+        return;
+    }
+    MapRect newSize(TilePoint(0, 0), dlg.ResultW(), dlg.ResultH());
+    auto* cmd = new ResizeMapCmd(mEd, mapNum, newSize);
+    mEd.AddCmd(cmd);
+    RethinkTitle();
+}
+
 
 // EditListener
 void MainWindow::EditorPenChanged()

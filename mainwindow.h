@@ -41,6 +41,7 @@ private slots:
     bool saveAs();
     void help();
     void addMap();
+    void resizeMap();
 private:
     void createActions();
     void createMenus();
@@ -64,6 +65,7 @@ private:
        QAction* exit{nullptr};
        QAction* help{nullptr};
        QAction* addMap{nullptr};
+       QAction* resizeMap{nullptr};
        QAction* mapNext{nullptr};
        QAction* mapPrev{nullptr};
        QAction* mapNorth{nullptr};

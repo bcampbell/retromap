@@ -41,12 +41,13 @@ void MapEditor::SetCurrentMap(int mapNum)
 
 void MapEditor::MapNavLinear(int delta)
 {
+    int numMaps = (int)mProj.maps.size();
     int n = mCurMap + delta;
     while(n < 0) {
-        n += (int)mProj.maps.size();
+        n += numMaps;
     }
-    while(n >= mProj.maps.size()) {
-        n -= (int)mProj.maps.size();
+    while(n >= numMaps) {
+        n -= numMaps;
     }
     SetCurrentMap(n);
 }
@@ -62,7 +63,7 @@ void MapEditor::MapNav2D(int dx, int dy)
     if(y < 0) {y += h;}
     if(y >= h) {y -= h;}
     int n = y*w + x;
-    if (n >= 0 && n < mProj.maps.size()) {
+    if (n >= 0 && n < (int)mProj.maps.size()) {
         SetCurrentMap(n);
     }
 }
@@ -75,6 +76,16 @@ void MapEditor::ProjMapModified(int mapNum, MapRect const& dirty)
             view->MapModified(dirty);
         }
     }
+}
+
+void MapEditor::ProjNuke()
+{
+    int mapNum = mCurMap;
+    if (mapNum >= (int)mProj.maps.size()) {
+        assert(!mProj.maps.empty());
+        mapNum = mProj.maps.size() - 1;
+    }
+    SetCurrentMap(mapNum);
 }
 
 
@@ -105,22 +116,16 @@ void MapEditor::ProjCharsetModified()
 
 void MapEditor::Press(MapView* view, PixPoint const& pt, int button)
 {
-    int tw = mProj.charset.tw;
-    int th = mProj.charset.th;
     mEd.tool->Press(view, mCurMap, pt, button);
 }
 
 void MapEditor::Move(MapView* view, PixPoint const& pt, int button)
 {
-    int tw = mProj.charset.tw;
-    int th = mProj.charset.th;
     mEd.tool->Move(view, mCurMap, pt, button);
 }
 
 void MapEditor::Release(MapView* view, PixPoint const& pt, int button)
 {
-    int tw = mProj.charset.tw;
-    int th = mProj.charset.th;
     mEd.tool->Release(view, mCurMap, pt, button);
 }
 

@@ -186,3 +186,35 @@ void ReplaceCharsetCmd::Undo()
 {
     Do();
 }
+
+//
+// ResizeMapCmd
+//
+ResizeMapCmd::ResizeMapCmd(Editor& ed, int mapNum, MapRect r) :
+    Cmd(ed), mMapNum(mapNum)
+{
+    assert(mapNum >=0 && mapNum < (int)ed.proj.maps.size());
+    mOther = ed.proj.maps[mapNum].Copy(r);
+}
+
+void ResizeMapCmd::Swap()
+{
+    std::swap(mEd.proj.maps[mMapNum], mOther);
+    for (auto l : mEd.listeners) {
+        l->ProjNuke();
+    }
+    mEd.modified = true;
+}
+
+void ResizeMapCmd::Do()
+{
+    Swap();
+    mState = DONE;
+}
+
+void ResizeMapCmd::Undo()
+{
+    Swap();
+    mState = NOT_DONE;
+}
+

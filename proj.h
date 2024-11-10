@@ -86,6 +86,9 @@ struct Tilemap
         return MapRect(TilePoint(0, 0), w, h);
     }
 
+    // Return area r of as a new tilemap.
+    // Any cells outside bounds of map will be zero.
+    // (So r can go outside the map area).
     Tilemap Copy(MapRect const& r) const;
 };
 

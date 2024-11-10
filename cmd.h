@@ -66,3 +66,17 @@ private:
     Charset mTiles;
 };
 
+// Change the size of a given map.
+class ResizeMapCmd : public Cmd
+{
+public:
+    ResizeMapCmd() = delete;
+    ResizeMapCmd(Editor& ed, int mapNum, MapRect newDimensions);
+    virtual void Do();
+    virtual void Undo();
+private:
+    void Swap();
+    int mMapNum;
+    Tilemap mOther;
+};
+

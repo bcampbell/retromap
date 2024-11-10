@@ -31,10 +31,11 @@ public:
     void Release(MapView* view, PixPoint const& pt, int button);
 
     // EditListener
+    virtual void ProjCharsetModified();
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
+    virtual void ProjNuke();
     virtual void ProjMapsInserted(int first, int count);
     virtual void ProjMapsRemoved(int first, int count);
-    virtual void ProjCharsetModified();
 
 private:
     Editor& mEd;

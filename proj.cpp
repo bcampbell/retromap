@@ -39,17 +39,16 @@ Tilemap Tilemap::Copy(MapRect const& r) const
     out.w = r.w;
     out.h = r.h;
     out.cells.resize(r.w * r.h);
-    TilePoint srcRowStart(r.pos);
-    TilePoint destRowStart(0, 0);
     for (int y = 0; y < r.h; ++y) {
-        Cell const* src = CellPtrConst(srcRowStart);
-        Cell* dest = out.CellPtr(destRowStart);
-        //Cell* backup = mBackup.CellPtr(TilePoint(0,y));
+        Cell* dest = out.CellPtr(TilePoint(0,y));
         for (int x = 0; x < r.w; ++x) {
-            *dest++ = *src++;
+            // Slow and naive per-tile clipping, but nice and simple :-)
+            TilePoint srcPos(r.pos.x + x, r.pos.y + y);
+            if (Bounds().Contains(srcPos)) {
+                *dest = CellAt(srcPos);
+            }
+            ++dest;
         }
-        ++srcRowStart.y;
-        ++destRowStart.y;
     }
     return out;
 }
