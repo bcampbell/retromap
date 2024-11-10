@@ -20,6 +20,7 @@ void CharsetWidget::SetTiles(Charset* tiles, Palette* palette)
     mTiles = tiles;
     mPalette = palette;
     InitTiles();
+    resize(sizeHint());
     update();
 }
 
