@@ -65,6 +65,7 @@ private:
        QAction* exit{nullptr};
        QAction* help{nullptr};
        QAction* addMap{nullptr};
+       QAction* deleteMap{nullptr};
        QAction* resizeMap{nullptr};
        QAction* mapNext{nullptr};
        QAction* mapPrev{nullptr};

@@ -113,13 +113,32 @@ void MainWindow::createActions()
     mActions.help->setShortcuts(QKeySequence::HelpContents);
     connect(mActions.help, &QAction::triggered, this, &MainWindow::help);
 
-    mActions.addMap = new QAction(tr("Add map..."), this);
-    mActions.addMap->setShortcut(QKeySequence(Qt::Key_A));
-    connect(mActions.addMap, &QAction::triggered, this, &MainWindow::addMap);
-
-    mActions.resizeMap = new QAction(tr("Resize map..."), this);
-//    mActions.resizeMap->setShortcut(QKeySequence(Qt::Key_));
-    connect(mActions.resizeMap, &QAction::triggered, this, &MainWindow::resizeMap);
+    // Add map
+    {
+        QAction* a = new QAction(tr("Add map"), this);
+        a->setShortcut(QKeySequence(Qt::Key_A));
+        connect(a, &QAction::triggered, this, &MainWindow::addMap);
+        mActions.addMap = a;
+    }
+    // Delete current map
+    {
+        QAction* a = new QAction(tr("Delete map"), this);
+        connect(a, &QAction::triggered, [&](){
+             // Can't delete last map.
+            if (mEd.proj.maps.size() > 1) {
+                int cur = mPresenter.CurrentMap();
+                auto* cmd = new DeleteMapsCmd(mEd, cur, cur + 1);
+                mEd.AddCmd(cmd);
+            }
+        });
+        mActions.deleteMap = a;
+    }
+    // Resize current map
+    {
+        QAction* a= new QAction(tr("Resize map..."), this);
+        connect(a, &QAction::triggered, this, &MainWindow::resizeMap);
+        mActions.resizeMap = a;
+    }
 
 
     // navigate around maps
@@ -244,6 +263,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.mapEast);
         m->addSeparator();
         m->addAction(mActions.addMap);
+        m->addAction(mActions.deleteMap);
         m->addAction(mActions.resizeMap);
         menuBar()->addMenu(m);
     }
@@ -455,8 +475,6 @@ void MainWindow::addMap()
     int n = mPresenter.CurrentMap() + 1;
     InsertMapsCmd* cmd = new InsertMapsCmd(mEd, {map}, n);
     mEd.AddCmd(cmd);
-    mPresenter.SetCurrentMap(n);
-    RethinkTitle();
 }
 
 void MainWindow::resizeMap()
@@ -470,7 +488,6 @@ void MainWindow::resizeMap()
     MapRect newSize(TilePoint(0, 0), dlg.ResultW(), dlg.ResultH());
     auto* cmd = new ResizeMapCmd(mEd, mapNum, newSize);
     mEd.AddCmd(cmd);
-    RethinkTitle();
 }
 
 
@@ -511,15 +528,18 @@ void MainWindow::ProjMapModified(int mapNum, MapRect const& dirty)
 void MainWindow::ProjCharsetModified()
 {
     mCharsetWidget->SetTiles(&mEd.proj.charset, &mEd.proj.palette);
+    RethinkTitle();
 }
 
 // EditListener
 void MainWindow::ProjMapsInserted(int first, int count)
 {
+    RethinkTitle();
 }
 
 // EditListener
 void MainWindow::ProjMapsRemoved(int first, int count)
 {
+    RethinkTitle();
 }
 

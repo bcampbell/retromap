@@ -54,6 +54,19 @@ private:
     int mPos;
 };
 
+class DeleteMapsCmd : public Cmd
+{
+public:
+    DeleteMapsCmd() = delete;
+    DeleteMapsCmd(Editor& ed, int beginMap, int endMap);
+    virtual void Do();
+    virtual void Undo();
+private:
+    std::vector<Tilemap> mBackup;
+    int mBeginMap;
+    int mEndMap;
+};
+
 class ReplaceCharsetCmd : public Cmd
 {
 public:

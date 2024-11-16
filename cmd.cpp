@@ -148,7 +148,9 @@ void MapDrawCmd::Swap()
     }
 }
 
-
+//
+// InsertMapsCmd
+//
 void InsertMapsCmd::Do()
 {
     auto dest = mEd.proj.maps.begin() + mPos;
@@ -171,7 +173,59 @@ void InsertMapsCmd::Undo()
     mState = NOT_DONE;
 }
 
+//
+// DeleteMapsCmd
+//
+DeleteMapsCmd::DeleteMapsCmd(Editor& ed, int beginMap, int endMap) :
+    Cmd(ed), mBeginMap(beginMap), mEndMap(endMap)
+{
+    int nMaps = (int)mEd.proj.maps.size();
+    assert(beginMap >= 0 && beginMap < nMaps);
+    assert(endMap >= 0 && endMap <= nMaps);
+    assert(endMap >= beginMap);
+}
 
+void DeleteMapsCmd::Do()
+{
+    // Remove affected maps to mBackup.
+    auto& maps = mEd.proj.maps;
+    auto beginIt = maps.begin() + mBeginMap;
+    auto endIt = maps.begin() + mEndMap;
+    mBackup.reserve(endIt - beginIt);
+    mBackup.clear();
+    for (auto it = beginIt; it != endIt; ++it) {
+        mBackup.push_back(std::move(*it));
+    }
+    maps.erase(beginIt, endIt);
+
+    // Tell everyone.
+    for (auto l : mEd.listeners) {
+        l->ProjMapsRemoved(mBeginMap, mEndMap - mBeginMap);
+    }
+
+    mEd.modified = true;
+    mState = DONE;
+}
+
+void DeleteMapsCmd::Undo()
+{
+    auto& maps = mEd.proj.maps;
+    maps.insert(maps.begin() + mBeginMap, mBackup.begin(), mBackup.end());
+    mBackup.clear();
+    for (auto l : mEd.listeners) {
+        l->ProjMapsInserted(mBeginMap, mBackup.size());
+    }
+
+    mEd.modified = true;
+    mState = NOT_DONE;
+}
+
+
+
+
+//
+// ReplaceCharsetCmd
+//
 void ReplaceCharsetCmd::Do()
 {
     std::swap(mEd.proj.charset, mTiles);
