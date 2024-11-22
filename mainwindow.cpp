@@ -139,6 +139,12 @@ void MainWindow::createActions()
         connect(a, &QAction::triggered, this, &MainWindow::resizeMap);
         mActions.resizeMap = a;
     }
+    // Import maps
+    {
+        QAction* a= new QAction(tr("Import maps..."), this);
+        connect(a, &QAction::triggered, this, &MainWindow::importMaps);
+        mActions.importMaps = a;
+    }
 
 
     // navigate around maps
@@ -235,6 +241,7 @@ void MainWindow::createMenus()
         QMenu* m = new QMenu(tr("&File"), this);
         m->addAction(mActions.importCharset);
         m->addAction(mActions.open);
+        m->addAction(mActions.importMaps);
         m->addSeparator();
         m->addAction(mActions.save);
         m->addAction(mActions.saveAs);
@@ -487,6 +494,28 @@ void MainWindow::resizeMap()
     }
     MapRect newSize(TilePoint(0, 0), dlg.ResultW(), dlg.ResultH());
     auto* cmd = new ResizeMapCmd(mEd, mapNum, newSize);
+    mEd.AddCmd(cmd);
+}
+
+void MainWindow::importMaps()
+{
+    QString initialPath = QDir::currentPath();
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Import maps"),
+                               initialPath,
+                               tr("All Files (*)"));
+    if (fileName.isEmpty())
+        return;
+
+    Proj donor;
+    if (!LoadProject(donor, fileName)) {
+        // TODO: proper error message
+        QMessageBox::critical(this, tr("Import failed"), tr("Poop. It's all gone pear-shaped."));
+        return;
+    }
+
+    // Insert them after current one (disregard palette, charset etc...)
+    int n = mPresenter.CurrentMap() + 1;
+    InsertMapsCmd* cmd = new InsertMapsCmd(mEd, donor.maps, n);
     mEd.AddCmd(cmd);
 }
 

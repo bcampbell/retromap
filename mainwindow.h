@@ -42,6 +42,7 @@ private slots:
     void help();
     void addMap();
     void resizeMap();
+    void importMaps();
 private:
     void createActions();
     void createMenus();
@@ -67,6 +68,7 @@ private:
        QAction* addMap{nullptr};
        QAction* deleteMap{nullptr};
        QAction* resizeMap{nullptr};
+       QAction* importMaps{nullptr};
        QAction* mapNext{nullptr};
        QAction* mapPrev{nullptr};
        QAction* mapNorth{nullptr};
