@@ -81,6 +81,9 @@ private:
        QAction* pickupTool{nullptr};
        QAction* rectTool{nullptr};
        QAction* useCustomBrush{nullptr};
+       QAction* drawModeNormal{nullptr};
+       QAction* drawModeTile{nullptr};
+       QAction* drawModeInk{nullptr};
     } mActions;
 
 };

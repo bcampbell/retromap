@@ -20,7 +20,7 @@ static const uint8_t placeholder8x8[8*8] = {
 
 void RenderCell(QImage& targ, QPoint pos, Charset const& charset, Palette const& palette, Cell const& pen)
 {
-    //printf("renderCell(%d %d tile:%d ink:%d paper:%d)\n", pos.x(), pos.y(), pen.tile, pen.ink, pen.paper);
+    // printf("renderCell(%d %d tile:%d ink:%d paper:%d)\n", pos.x(), pos.y(), pen.tile, pen.ink, pen.paper);
     uint8_t const* ink = &(palette.colours[pen.ink*4]);
     uint8_t const* paper = &(palette.colours[pen.paper*4]);
     uint8_t const* src;

@@ -27,6 +27,13 @@ MainWindow::MainWindow(QWidget *parent, Editor& ed)
 
     mEd.listeners.insert(this);
     createActions();
+
+    switch (mEd.drawFlags) {
+        case DRAWFLAG_ALL: mActions.drawModeNormal->setChecked(true); break;
+        case DRAWFLAG_TILE: mActions.drawModeTile->setChecked(true); break;
+        case DRAWFLAG_INK: mActions.drawModeInk->setChecked(true); break;
+    }
+
     createMenus();
     createWidgets();
     RethinkTitle();
@@ -232,6 +239,34 @@ void MainWindow::createActions()
         });
     }
 
+    // Draw modes
+
+    {
+        QActionGroup *drawModeGroup = new QActionGroup(this);
+        QAction* a;
+
+        mActions.drawModeNormal = a = new QAction(tr("Normal"), drawModeGroup);
+        a->setCheckable(true);
+        //a->setShortcut(QKeySequence(Qt::Key_D));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.drawFlags = DRAWFLAG_ALL;
+        });
+
+        mActions.drawModeTile = a = new QAction(tr("Tile Only"), drawModeGroup);
+        a->setCheckable(true);
+        //a->setShortcut(QKeySequence(Qt::Key_B));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.drawFlags = DRAWFLAG_TILE;
+        });
+
+        mActions.drawModeInk = a = new QAction(tr("Ink Only"), drawModeGroup);
+        a->setCheckable(true);
+        //a->setShortcut(QKeySequence(Qt::Key_B));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.drawFlags = DRAWFLAG_INK;
+        });
+    }
+
 }
 
 
@@ -272,6 +307,13 @@ void MainWindow::createMenus()
         m->addAction(mActions.addMap);
         m->addAction(mActions.deleteMap);
         m->addAction(mActions.resizeMap);
+        menuBar()->addMenu(m);
+    }
+    {
+        QMenu* m = new QMenu(tr("&Drawmode"), this);
+        m->addAction(mActions.drawModeNormal);
+        m->addAction(mActions.drawModeTile);
+        m->addAction(mActions.drawModeInk);
         menuBar()->addMenu(m);
     }
     {
@@ -319,6 +361,13 @@ void MainWindow::createWidgets()
         toolbar->addAction(mActions.drawTool);
         toolbar->addAction(mActions.pickupTool);
         v->addWidget(toolbar, Qt::AlignLeading);
+
+        QToolBar *drawModeBar = new QToolBar(this);
+        drawModeBar->addAction(mActions.drawModeNormal);
+        drawModeBar->addAction(mActions.drawModeTile);
+        drawModeBar->addAction(mActions.drawModeInk);
+        v->addWidget(drawModeBar, Qt::AlignLeading);
+
         v->addWidget(mPenWidget, Qt::AlignLeading);
         v->addWidget(mPaletteWidget, Qt::AlignLeading);
         h->addLayout(v);

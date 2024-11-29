@@ -26,6 +26,12 @@ public:
 };
 
 
+// Bitflags for what to draw into cells
+#define DRAWFLAG_TILE 0x01
+#define DRAWFLAG_INK 0x02
+#define DRAWFLAG_PAPER 0x04
+#define DRAWFLAG_ALL (DRAWFLAG_TILE|DRAWFLAG_INK|DRAWFLAG_PAPER)
+
 // Owns a Proj and holds all the editing state.
 class Editor {
 public:
@@ -49,6 +55,8 @@ public:
     Cell leftPen;
     Cell rightPen;
     bool useBrush{false};   // use brush for drawing?
+    int drawFlags{DRAWFLAG_ALL}; // which parts of cell to draw to
+
 
     Tool* tool{nullptr};
 

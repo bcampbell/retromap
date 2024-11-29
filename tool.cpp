@@ -31,16 +31,16 @@ void DrawTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
 
     if (b & LEFT) {
         if (mEd.useBrush) {
-            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen);
+            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.leftPen);
+            mCmd->Plonk(tp, mEd.leftPen, mEd.drawFlags);
         }
     }
     if (b & RIGHT) {
         if (mEd.useBrush) {
-            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen);
+            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.rightPen);
+            mCmd->Plonk(tp, mEd.rightPen, mEd.drawFlags);
         }
     }
 }
@@ -74,16 +74,16 @@ void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
 
     if (b & LEFT) {
         if (mEd.useBrush) {
-            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen);
+            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.leftPen);
+            mCmd->Plonk(tp, mEd.leftPen, mEd.drawFlags);
         }
     }
     if (b & RIGHT) {
         if (mEd.useBrush) {
-            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen);
+            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.rightPen);
+            mCmd->Plonk(tp, mEd.rightPen, mEd.drawFlags);
         }
     }
 }

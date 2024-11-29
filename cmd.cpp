@@ -13,14 +13,24 @@ MapDrawCmd::MapDrawCmd(Editor& ed, int mapNum) :
     mBackup = map;
 }
 
-void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
+
+static Cell combine(Cell const& dest, Cell const& pen, int drawFlags)
+{
+    return Cell{
+        drawFlags & DRAWFLAG_TILE ? pen.tile : dest.tile,
+        drawFlags & DRAWFLAG_INK ? pen.ink : dest.ink,
+        drawFlags & DRAWFLAG_PAPER ? pen.paper : dest.paper
+    };
+}
+
+void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell, int drawFlags)
 {
     assert(State() == DONE);
     Proj& proj = mEd.proj;
     Tilemap& map = proj.maps[mMapNum];
 
     assert(map.Bounds().Contains(pos));
-    map.CellAt(pos) = cell;
+    map.CellAt(pos) = combine(map.CellAt(pos), cell, drawFlags);
     // Tell everyone.
     mEd.modified = true;
     MapRect dirty(pos, 1, 1);
@@ -30,7 +40,7 @@ void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell)
     }
 }
 
-void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent)
+void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
 {
     assert(State() == DONE);
     Proj& proj = mEd.proj;
@@ -50,7 +60,7 @@ void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell cons
         for (int x=0; x<srcRect.w; ++x) {
             Cell c = *src++;
             if (c.tile != transparent.tile) {
-                *dest = c;
+                *dest = combine(*dest, c, drawFlags);
             }
             ++dest;
         }
@@ -63,7 +73,7 @@ void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell cons
     }
 }
 
-void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent)
+void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
 {
     assert(State() == DONE);
     Proj& proj = mEd.proj;
@@ -83,7 +93,7 @@ void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell con
         for (int x=0; x<srcRect.w; ++x) {
             Cell c = *src++;
             if (c.tile != transparent.tile) {
-                *dest = transparent;
+                *dest = combine(*dest, transparent, drawFlags);
             }
             ++dest;
         }
