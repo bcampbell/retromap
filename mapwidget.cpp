@@ -6,6 +6,7 @@
 //#include <cassert>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QPainterPath>
 
 constexpr int CURSORPENW = 3;
 
@@ -38,12 +39,25 @@ void MapWidget::SetMap(Tilemap* tilemap, Charset* charset, Palette* palette)
     update();
 }
 
-QRect MapWidget::MapRectToWidget(MapRect const& r) {
+QRect MapWidget::FromMap(MapRect const& r) const {
     int tw = mCharset->tw;
     int th = mCharset->th;
     return QRect(r.pos.x * tw * mZoom, r.pos.y * th * mZoom,
         r.w * tw * mZoom, r.h * th * mZoom);
 }
+
+MapRect MapWidget::ToMap(QRectF const& r) const {
+    int tw = mCharset->tw * mZoom;
+    int th = mCharset->th * mZoom;
+
+    MapRect out;
+    out.pos = TilePoint(r.x() / tw, r.y() / th);
+    // We want all overlapping tiles, not just contained ones.
+    out.w = (r.width() + tw - 1) / tw;
+    out.h = (r.height() + th - 1) / th;
+    return out;
+}
+
 
 void MapWidget::HideCursor()
 {
@@ -54,7 +68,7 @@ void MapWidget::HideCursor()
     // erase existing cursor
     mCursorOn = false;
     const int pw = CURSORPENW;
-    QRect r = MapRectToWidget(mCursor).adjusted(-pw,-pw, pw, pw);
+    QRect r = FromMap(mCursor).adjusted(-pw,-pw, pw, pw);
     update(r);
 }
 
@@ -64,7 +78,7 @@ void MapWidget::SetCursor(MapRect const& cursor)
     mCursorOn = true;
     mCursor = cursor;
     const int pw = CURSORPENW;
-    QRect r = MapRectToWidget(mCursor).adjusted(-pw,-pw, pw, pw);
+    QRect r = FromMap(mCursor).adjusted(-pw,-pw, pw, pw);
     update(r);
 }
 
@@ -72,7 +86,7 @@ void MapWidget::MapModified(MapRect const& dirty)
 {
     if (IsValidMap()) {
         UpdateBacking(dirty);
-        update(MapRectToWidget(dirty));
+        update(FromMap(dirty));
     }
 }
 
@@ -186,11 +200,56 @@ void MapWidget::paintEvent(QPaintEvent *event)
         painter.drawImage(r, mBacking, src);
     }
 
+    // Draw overlays
+    {
+        MapRect m = mTilemap->Bounds().Clip(ToMap(event->rect()));
+        if (mShowGrid) {
+            // Draw grid
+            QPen gridPen(QColor(0,255,0,255), 1, Qt::DotLine);
+            painter.setPen(gridPen);
+            int tw = mCharset->tw * mZoom;
+            int th = mCharset->th * mZoom;
+            for (int y = m.pos.y; y <= m.pos.y + m.h; ++y) {
+                QPoint p1(m.pos.x * tw, y * th);
+                QPoint p2((m.pos.x + m.w) *tw, y * th);
+                painter.drawLine(p1, p2);
+            }
+            for (int x = m.pos.x; x <= m.pos.x + m.w; ++x) {
+                QPoint p1(x * tw, m.pos.y * th);
+                QPoint p2(x * tw, (m.pos.y + m.h) * th);
+                painter.drawLine(p1, p2);
+            }
+
+            for (int y = m.pos.y; y < m.pos.y + m.h; ++y) {
+                for (int x = m.pos.x; x < m.pos.x + m.w; ++x) {
+                    TilePoint tp(x, y);
+
+                    QRect bound = FromMap(MapRect(tp, 1, 1));
+                    Cell const& c = mTilemap->CellAt(tp);
+
+                    // text
+                    QString t;
+                    if (mZoom < 4) {
+                       t = QString("%1").arg(c.tile);
+                    } else {
+                       t = QString("%1\n%2").arg(c.tile).arg(c.ink);
+                    }
+                    painter.setPen(QColor(0,0,0,128));
+                    painter.drawText(bound.adjusted(2,2,0,0), Qt::AlignCenter, t);
+                    painter.setPen(QColor(255,255,255,128));
+                    painter.drawText(bound, Qt::AlignCenter, t);
+                }
+            }
+        }
+    }
+
+
     // Draw cursor.
     if(mCursorOn) {
-        QRect r = MapRectToWidget(mCursor);
-        QPen whitePen(Qt::green,1);
-        painter.setPen(whitePen);
+        QRect r = FromMap(mCursor);
+        QPen p(Qt::green,1);
+        painter.setPen(p);
+        painter.setBrush(Qt::NoBrush);
         painter.drawRect(r);
 
         QPen blackPen(Qt::black,1);
@@ -199,5 +258,11 @@ void MapWidget::paintEvent(QPaintEvent *event)
         painter.drawRect(r.adjusted(-1,-1,1,1));
     }
 
+}
+
+void MapWidget::ShowGrid(bool yesno)
+{
+    mShowGrid = yesno;
+    update();
 }
 

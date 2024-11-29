@@ -84,6 +84,7 @@ private:
        QAction* drawModeNormal{nullptr};
        QAction* drawModeTile{nullptr};
        QAction* drawModeInk{nullptr};
+       QAction* showGrid{nullptr};
     } mActions;
 
 };

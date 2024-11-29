@@ -32,6 +32,8 @@ public:
     virtual void SetCursor(MapRect const& area);
     virtual void HideCursor();
 
+    void ShowGrid(bool yesno);
+    bool IsGridShown() const {return mShowGrid;}
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -47,11 +49,13 @@ private:
     Palette* mPalette{nullptr};
     QImage mBacking;
     int mZoom{3};
-
+    bool mShowGrid{false};
     bool mCursorOn{false};
     MapRect mCursor;
 
-    QRect MapRectToWidget(MapRect const& r);
+    QRect FromMap(MapRect const& r) const;
+    MapRect ToMap(QRectF const& r) const;
+
     void UpdateBacking(MapRect const& dirty);
     bool IsValidMap() const {return mTilemap && mCharset && mPalette;}
 };

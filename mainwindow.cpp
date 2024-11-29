@@ -252,14 +252,14 @@ void MainWindow::createActions()
             self->mEd.drawFlags = DRAWFLAG_ALL;
         });
 
-        mActions.drawModeTile = a = new QAction(tr("Tile Only"), drawModeGroup);
+        mActions.drawModeTile = a = new QAction(tr("Tile only"), drawModeGroup);
         a->setCheckable(true);
         //a->setShortcut(QKeySequence(Qt::Key_B));
         connect(a, &QAction::triggered, this, [self=this]() {
             self->mEd.drawFlags = DRAWFLAG_TILE;
         });
 
-        mActions.drawModeInk = a = new QAction(tr("Ink Only"), drawModeGroup);
+        mActions.drawModeInk = a = new QAction(tr("Ink only"), drawModeGroup);
         a->setCheckable(true);
         //a->setShortcut(QKeySequence(Qt::Key_B));
         connect(a, &QAction::triggered, this, [self=this]() {
@@ -267,6 +267,17 @@ void MainWindow::createActions()
         });
     }
 
+
+    // Show grid
+    {
+        QAction* a = new QAction(tr("Show grid"));
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_G));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mMapWidget->ShowGrid(!self->mMapWidget->IsGridShown());
+        });
+        mActions.showGrid = a;
+    }
 }
 
 
@@ -307,6 +318,8 @@ void MainWindow::createMenus()
         m->addAction(mActions.addMap);
         m->addAction(mActions.deleteMap);
         m->addAction(mActions.resizeMap);
+        m->addSeparator();
+        m->addAction(mActions.showGrid);
         menuBar()->addMenu(m);
     }
     {
