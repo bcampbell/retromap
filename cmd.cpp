@@ -40,6 +40,35 @@ void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell, int drawFlags)
     }
 }
 
+void MapDrawCmd::DrawRect(MapRect const& area, Cell const& pen, int drawFlags)
+{
+    assert(State() == DONE);
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+
+    // clip to map
+    MapRect destRect = map.Bounds().Clip(area);
+    // transform clipped area into brush space
+    MapRect srcRect = destRect;
+    srcRect.pos.x -= destRect.pos.x;
+    srcRect.pos.y -= destRect.pos.y;
+
+    // do it
+    for (int y=0; y<srcRect.h; ++y) {
+        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        for (int x=0; x<srcRect.w; ++x) {
+            *dest = combine(*dest, pen, drawFlags);
+            ++dest;
+        }
+    }
+    // Tell everyone.
+    mEd.modified = true;
+    mDamageExtent.Merge(destRect);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, destRect);
+    }
+}
+
 void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
 {
     assert(State() == DONE);

@@ -216,6 +216,13 @@ void MainWindow::createActions()
             self->mEd.SetTool(TOOL_DRAW);
         });
 
+        mActions.rectTool = a = new QAction(tr("Rectangle"), toolGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_R));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.SetTool(TOOL_RECT);
+        });
+
         mActions.pickupTool = a = new QAction(tr("Pick up brush"), toolGroup);
         a->setCheckable(true);
         a->setShortcut(QKeySequence(Qt::Key_B));
@@ -301,6 +308,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.redo);
         m->addSeparator();
         m->addAction(mActions.drawTool);
+        m->addAction(mActions.rectTool);
         m->addAction(mActions.pickupTool);
         m->addSeparator();
         m->addAction(mActions.useCustomBrush);
@@ -372,6 +380,7 @@ void MainWindow::createWidgets()
 
         QToolBar *toolbar = new QToolBar(this);
         toolbar->addAction(mActions.drawTool);
+        toolbar->addAction(mActions.rectTool);
         toolbar->addAction(mActions.pickupTool);
         v->addWidget(toolbar, Qt::AlignLeading);
 

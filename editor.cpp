@@ -33,6 +33,7 @@ void Editor::SetTool(int toolKind)
     Tool* newTool = nullptr;
     switch(toolKind) {
         case TOOL_DRAW: newTool = new DrawTool(*this); break;
+        case TOOL_RECT: newTool = new RectTool(*this); break;
         case TOOL_PICKUP: newTool = new PickupTool(*this); break;
 //        case TOOL_BRUSH: newTool = new BrushTool(*this); break;
         default:

@@ -163,6 +163,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (mPresenter) {
         int butt = toToolButtons(event->buttons());
+        // NOTE: butt will exclude the button that was just released!
         QPoint pos(event->position().toPoint());
         PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
         mPresenter->Release(this, pix, butt);

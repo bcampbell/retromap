@@ -78,8 +78,8 @@ private:
        QAction* undo{nullptr};
        QAction* redo{nullptr};
        QAction* drawTool{nullptr};
-       QAction* pickupTool{nullptr};
        QAction* rectTool{nullptr};
+       QAction* pickupTool{nullptr};
        QAction* useCustomBrush{nullptr};
        QAction* drawModeNormal{nullptr};
        QAction* drawModeTile{nullptr};
