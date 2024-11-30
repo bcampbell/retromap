@@ -10,9 +10,9 @@ class Editor;
 
 #define TOOL_DRAW 0
 #define TOOL_PICKUP 1
-#define TOOL_BRUSH 2
-#define TOOL_RECT 3
-#define TOOL_FLOODFILL 4
+//#define TOOL_BRUSH ???
+#define TOOL_RECT 2
+#define TOOL_FLOODFILL 3
 // Yes. Should be an enum. Patches welcome.
 
 class Tool

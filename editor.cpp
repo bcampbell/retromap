@@ -10,7 +10,7 @@ Editor::Editor()
     leftPen = {1,1,0};
     rightPen = {32,0,0};
     InitProj(&proj);
-    tool = new PickupTool(*this);
+    tool = new DrawTool(*this);
 }
 
 

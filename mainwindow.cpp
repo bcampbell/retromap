@@ -637,8 +637,18 @@ void MainWindow::EditorToolChanged()
         }
         break;
     case TOOL_PICKUP:
-        if (mActions.pickupTool->isChecked()) {
+        if (!mActions.pickupTool->isChecked()) {
             mActions.pickupTool->setChecked(true);
+        }
+        break;
+    case TOOL_RECT:
+        if (!mActions.rectTool->isChecked()) {
+            mActions.rectTool->setChecked(true);
+        }
+        break;
+    case TOOL_FLOODFILL:
+        if (!mActions.floodFillTool->isChecked()) {
+            mActions.floodFillTool->setChecked(true);
         }
         break;
     }

@@ -280,7 +280,6 @@ void FloodFillTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
 
 void FloodFillTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
 {
-    mEd.SetTool(TOOL_DRAW);
 }
 
 void FloodFillTool::Reset()
