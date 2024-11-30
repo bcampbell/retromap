@@ -80,6 +80,7 @@ private:
        QAction* drawTool{nullptr};
        QAction* rectTool{nullptr};
        QAction* pickupTool{nullptr};
+       QAction* floodFillTool{nullptr};
        QAction* useCustomBrush{nullptr};
        QAction* drawModeNormal{nullptr};
        QAction* drawModeTile{nullptr};

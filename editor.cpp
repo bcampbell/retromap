@@ -35,6 +35,7 @@ void Editor::SetTool(int toolKind)
         case TOOL_DRAW: newTool = new DrawTool(*this); break;
         case TOOL_RECT: newTool = new RectTool(*this); break;
         case TOOL_PICKUP: newTool = new PickupTool(*this); break;
+        case TOOL_FLOODFILL: newTool = new FloodFillTool(*this); break;
 //        case TOOL_BRUSH: newTool = new BrushTool(*this); break;
         default:
             assert(false);  // bad tool.

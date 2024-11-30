@@ -13,3 +13,6 @@ void InitProj(Proj* proj);
 bool SaveProject(Proj const& proj, QString const& filename);
 bool LoadProject(Proj& proj, QString const& filename);
 
+// TODO: move into non gui code!
+MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags);
+

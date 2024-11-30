@@ -184,3 +184,73 @@ bool LoadProject(Proj& proj, QString const& filename)
     return ReadProj(proj, buf.data(), buf.data() + buf.size()); 
 }
 
+// Do floodfill, return damaged area.
+MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
+{
+    MapRect damage;
+
+    // Sample the tile at the start point for what we'll be replacing.
+    Cell old = map.CellAt(start);
+    if (old.tile == pen.tile) {
+        // already done...
+        return damage;
+    }
+
+    std::vector<TilePoint> q;
+    q.push_back(start);
+    while(!q.empty())
+    {
+        TilePoint pt = q.back();
+        q.pop_back();
+        if (map.CellAt(pt).tile != old.tile) {
+            continue;
+        }
+
+        // scan left and right to find span
+        int y = pt.y;
+        int l = pt.x;
+        while (l > 0 && map.CellAt(TilePoint(l - 1, y)).tile == old.tile) {
+            --l;
+        }
+        int r = pt.x;
+        while (r < map.w - 1 && map.CellAt(TilePoint(r + 1, y)).tile == old.tile) {
+            ++r;
+        }
+
+        // fill the span
+        Cell* dest = map.CellPtr(TilePoint(l, y));
+        int x;
+        for (x = l; x <= r; ++x ) {
+            *dest++ = pen;
+        }
+
+        // expand the damage box to include the affected span
+        damage.Merge(MapRect(TilePoint(l, y), (r + 1 ) - l, 1));
+
+        // add cells above the span to the queue
+        y = pt.y - 1;
+        if (y >= 0 )
+        {
+            for (x = l; x <= r; ++x)
+            {
+                if (map.CellAt(TilePoint(x, y)).tile == old.tile) {
+                    q.push_back(TilePoint(x, y));
+                }
+            }
+        }
+
+        // add pixels below the span to the queue
+        y = pt.y + 1;
+        if (y < map.h)
+        {
+            for (x = l; x <= r; ++x)
+            {
+                if (map.CellAt(TilePoint(x, y)).tile == old.tile) {
+                    q.push_back(TilePoint(x, y));
+                }
+            }
+        }
+    }
+    return damage;
+}
+

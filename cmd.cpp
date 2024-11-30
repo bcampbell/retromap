@@ -102,6 +102,15 @@ void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell cons
     }
 }
 
+void MapDrawCmd::AddDamage(MapRect const& damage)
+{
+    mEd.modified = true;
+    mDamageExtent.Merge(damage);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, damage);
+    }
+}
+
 void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
 {
     assert(State() == DONE);

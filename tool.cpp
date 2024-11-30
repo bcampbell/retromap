@@ -1,4 +1,5 @@
 #include "cmd.h"
+#include "helpers.h"
 #include "tool.h"
 #include "proj.h"
 #include "mapview.h"
@@ -230,5 +231,50 @@ void RectTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
 void RectTool::Reset()
 {
     mLatch = 0;
+}
+
+
+//
+// FloodFillTool
+//
+
+void FloodFillTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+    TilePoint tp = mProj.ToTilePoint(pos);
+    Tilemap& map = mProj.maps[mapNum];
+    if (!map.IsValid(tp)) {
+        return;
+    }
+
+    MapDrawCmd* cmd = new MapDrawCmd(mEd, mapNum);
+
+    Cell pen;
+    if (b & LEFT) {
+        pen = mEd.leftPen;
+    } else if (b & RIGHT) {
+        pen = mEd.rightPen;
+    } else {
+        return;
+    }
+
+    MapRect damage = FloodFill(map, tp, pen, mEd.drawFlags);
+    cmd->AddDamage(damage);
+    cmd->Commit();
+    mEd.AddCmd(cmd);
+}
+
+void FloodFillTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+    TilePoint tp = mProj.ToTilePoint(pos);
+    view->SetCursor(MapRect(tp,1,1));
+}
+
+void FloodFillTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+    mEd.SetTool(TOOL_DRAW);
+}
+
+void FloodFillTool::Reset()
+{
 }
 

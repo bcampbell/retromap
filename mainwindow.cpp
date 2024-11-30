@@ -229,6 +229,13 @@ void MainWindow::createActions()
         connect(a, &QAction::triggered, this, [self=this]() {
             self->mEd.SetTool(TOOL_PICKUP);
         });
+
+        mActions.floodFillTool = a = new QAction(tr("Flood fill"), toolGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_F));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.SetTool(TOOL_FLOODFILL);
+        });
     }
 
     {
@@ -310,6 +317,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.drawTool);
         m->addAction(mActions.rectTool);
         m->addAction(mActions.pickupTool);
+        m->addAction(mActions.floodFillTool);
         m->addSeparator();
         m->addAction(mActions.useCustomBrush);
         menuBar()->addMenu(m);
@@ -382,6 +390,7 @@ void MainWindow::createWidgets()
         toolbar->addAction(mActions.drawTool);
         toolbar->addAction(mActions.rectTool);
         toolbar->addAction(mActions.pickupTool);
+        toolbar->addAction(mActions.floodFillTool);
         v->addWidget(toolbar, Qt::AlignLeading);
 
         QToolBar *drawModeBar = new QToolBar(this);

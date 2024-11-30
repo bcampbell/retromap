@@ -99,3 +99,17 @@ private:
     MapRect mSelection;
 };
 
+class FloodFillTool : public Tool
+{
+public:
+    FloodFillTool() = delete;
+    FloodFillTool(Editor& ed) : Tool(ed) {}
+    virtual ~FloodFillTool() {}
+
+    virtual int Kind() const {return TOOL_FLOODFILL;}
+    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Reset();
+};
+
