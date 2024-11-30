@@ -61,25 +61,33 @@ MapRect MapWidget::ToMap(QRectF const& r) const {
 
 void MapWidget::HideCursor()
 {
-    if(!mCursorOn) {
-        return;
-    }
-
-    // erase existing cursor
-    mCursorOn = false;
-    const int pw = CURSORPENW;
-    QRect r = FromMap(mCursor).adjusted(-pw,-pw, pw, pw);
-    update(r);
+    SetCursor(MapRect());
 }
 
 void MapWidget::SetCursor(MapRect const& cursor)
 {
-    HideCursor();   // erase existing, if any
-    mCursorOn = true;
-    mCursor = cursor;
+    if (mCursor == cursor) {
+        return; // no change.
+    }
+
     const int pw = CURSORPENW;
+
+    MapRect old = mCursor;
+    mCursor = cursor;
+
+    // Redraw old area
+    if (!old.IsEmpty()) {
+        QRect r = FromMap(old).adjusted(-pw,-pw, pw, pw);
+        update(r);
+    }
+
+    // Redraw new area
     QRect r = FromMap(mCursor).adjusted(-pw,-pw, pw, pw);
     update(r);
+
+    if (old != mCursor) {
+        emit cursorChanged(mCursor);
+    }
 }
 
 void MapWidget::MapModified(MapRect const& dirty)
@@ -246,7 +254,7 @@ void MapWidget::paintEvent(QPaintEvent *event)
 
 
     // Draw cursor.
-    if(mCursorOn) {
+    if(!mCursor.IsEmpty()) {
         QRect r = FromMap(mCursor);
         QPen p(Qt::green,1);
         painter.setPen(p);

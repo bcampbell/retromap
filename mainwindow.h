@@ -12,6 +12,7 @@ class PaletteWidget;
 class PenWidget;
 class CharsetWidget;
 class QAction;
+class QLabel;
 
 
 // Our main app window.
@@ -58,6 +59,7 @@ private:
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;
+    QLabel* mCursorMsg;
     struct {
        QAction* importCharset{nullptr};
        QAction* open{nullptr};

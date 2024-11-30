@@ -9,16 +9,18 @@
 #include "charsetwidget.h"
 
 #include <QAction>
+#include <QActionGroup>
 #include <QDir>
 #include <QFileDialog>
+#include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QScrollArea>
-#include <QVBoxLayout>
-#include <QActionGroup>
+#include <QStatusBar>
 #include <QToolBar>
 #include <QToolButton>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent, Editor& ed)
     : QMainWindow(parent), mEd(ed), mPresenter(ed)
@@ -355,8 +357,22 @@ void MainWindow::createMenus()
 
 void MainWindow::createWidgets()
 {
+    // Status bar
+    // Add a label for displaying the cursor status.
+    mCursorMsg = new QLabel();
+    statusBar()->addWidget(mCursorMsg);
 
+    // The main map editing area
     mMapWidget = new MapWidget(nullptr);
+
+    connect(mMapWidget, &MapWidget::cursorChanged, this, [&](MapRect const& cursor) {
+        // Show the cursor position on the status bar.
+        QString msg;
+        if(!cursor.IsEmpty()) {
+            msg = QString("%1,%2 (%3x%4)").arg(cursor.pos.x).arg(cursor.pos.y).arg(cursor.w).arg(cursor.h);
+        }
+        mCursorMsg->setText(msg);
+    });
 
     mCharsetWidget = new CharsetWidget(nullptr);
 

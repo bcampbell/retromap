@@ -62,6 +62,8 @@ struct MapRect
     MapRect Clip(MapRect const& r) const;
 };
 
+inline bool operator==(MapRect const& a, MapRect const& b)
+    {return a.pos == b.pos && a.w == b.w && a.h == b.h;}
 
 // A Map.
 // Just an rectangular array of cells, with some members to make access

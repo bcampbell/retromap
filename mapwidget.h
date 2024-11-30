@@ -35,6 +35,10 @@ public:
 
     void ShowGrid(bool yesno);
     bool IsGridShown() const {return mShowGrid;}
+
+signals:
+    void cursorChanged(MapRect const& cursor);
+
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
