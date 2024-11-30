@@ -228,8 +228,8 @@ void RectTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
 
         // go.
         MapDrawCmd* cmd = new MapDrawCmd(mEd, mapNum);
-        DrawRect(mProj.maps[mapNum], mSelection, pen, mEd.drawFlags);
-        cmd->AddDamage(mSelection);
+        MapRect damage = DrawRect(mProj.maps[mapNum], mSelection, pen, mEd.drawFlags);
+        cmd->AddDamage(damage);
         cmd->Commit();
         mEd.AddCmd(cmd);
 
