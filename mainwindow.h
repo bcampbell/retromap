@@ -14,7 +14,7 @@ class CharsetWidget;
 class QAction;
 
 
-// Map editing window.
+// Our main app window.
 class MainWindow : public QMainWindow, EditListener
 {
     Q_OBJECT

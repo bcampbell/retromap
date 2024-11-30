@@ -5,9 +5,8 @@
 class MapView;
 struct Proj;
 
-
-
 // MapEditor is Presenter part of MVP
+// Core class - no GUI code here, that's all in the view.
 class MapEditor : public EditListener {
 
 public:

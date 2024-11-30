@@ -5,12 +5,19 @@
 #include <vector>
 #include <cassert>
 
+// Our core data structures.
+
+// Maps hold cells, and each cell has a tile index and some extra metadata.
+// Possible future extensions will include x/y flip bits and a palette index
+// (lots of platforms have multiple palettes).
 struct Cell {
     uint16_t tile{0};
     uint8_t ink{0};
     uint8_t paper{0};
 };
 
+// Base point struct. Derived structs for specific uses to help catch common
+// mixups at compile time.
 struct Point
 {
     int x{0};
@@ -36,6 +43,7 @@ struct PixPoint : public Point
 };
 
 
+// A rectangular area on a map, in tile coords.
 struct MapRect
 {
     TilePoint pos;
@@ -54,6 +62,10 @@ struct MapRect
     MapRect Clip(MapRect const& r) const;
 };
 
+
+// A Map.
+// Just an rectangular array of cells, with some members to make access
+// easier.
 struct Tilemap
 {
     int w;
@@ -114,6 +126,7 @@ struct Palette
 };
 
 
+// Proj pulls together a set of maps, pallete and charset.
 struct Proj
 {
     std::vector<Tilemap> maps;
@@ -128,7 +141,6 @@ struct Proj
         return PixPoint(mp.x * charset.tw, mp.y * charset.th);
     }
 };
-
 
 
 void WriteProj(Proj const& proj, std::vector<uint8_t>& out);

@@ -8,6 +8,7 @@
 
 class Cmd;
 
+// Callback interface for things that want to know about changes.
 class EditListener
 {
 public:
@@ -33,6 +34,7 @@ public:
 #define DRAWFLAG_ALL (DRAWFLAG_TILE|DRAWFLAG_INK|DRAWFLAG_PAPER)
 
 // Owns a Proj and holds all the editing state.
+// TODO: Should probably be called EditState or something...
 class Editor {
 public:
     // start with a default proj

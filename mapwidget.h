@@ -12,6 +12,7 @@ class Tool;
 class MapEditor;
 
 // Implements the View part of MVP.
+// Provides the GUI part.
 // Handles rendering of map and overlayed stuff like cursors.
 // Also handles the initial layer of input, but delgates most input events
 // down to the Presenter layer.
