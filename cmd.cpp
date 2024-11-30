@@ -13,95 +13,6 @@ MapDrawCmd::MapDrawCmd(Editor& ed, int mapNum) :
     mBackup = map;
 }
 
-
-static Cell combine(Cell const& dest, Cell const& pen, int drawFlags)
-{
-    return Cell{
-        drawFlags & DRAWFLAG_TILE ? pen.tile : dest.tile,
-        drawFlags & DRAWFLAG_INK ? pen.ink : dest.ink,
-        drawFlags & DRAWFLAG_PAPER ? pen.paper : dest.paper
-    };
-}
-
-void MapDrawCmd::Plonk(TilePoint const& pos, Cell const& cell, int drawFlags)
-{
-    assert(State() == DONE);
-    Proj& proj = mEd.proj;
-    Tilemap& map = proj.maps[mMapNum];
-
-    assert(map.Bounds().Contains(pos));
-    map.CellAt(pos) = combine(map.CellAt(pos), cell, drawFlags);
-    // Tell everyone.
-    mEd.modified = true;
-    MapRect dirty(pos, 1, 1);
-    mDamageExtent.Merge(dirty);
-    for (auto l : mEd.listeners) {
-        l->ProjMapModified(mMapNum, dirty);
-    }
-}
-
-void MapDrawCmd::DrawRect(MapRect const& area, Cell const& pen, int drawFlags)
-{
-    assert(State() == DONE);
-    Proj& proj = mEd.proj;
-    Tilemap& map = proj.maps[mMapNum];
-
-    // clip to map
-    MapRect destRect = map.Bounds().Clip(area);
-    // transform clipped area into brush space
-    MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
-
-    // do it
-    for (int y=0; y<srcRect.h; ++y) {
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
-        for (int x=0; x<srcRect.w; ++x) {
-            *dest = combine(*dest, pen, drawFlags);
-            ++dest;
-        }
-    }
-    // Tell everyone.
-    mEd.modified = true;
-    mDamageExtent.Merge(destRect);
-    for (auto l : mEd.listeners) {
-        l->ProjMapModified(mMapNum, destRect);
-    }
-}
-
-void MapDrawCmd::DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
-{
-    assert(State() == DONE);
-    Proj& proj = mEd.proj;
-    Tilemap& map = proj.maps[mMapNum];
-
-    // clip brush area on map
-    MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
-    // transform clipped area into brush space
-    MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
-
-    // copy
-    for (int y=0; y<srcRect.h; ++y) {
-        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
-        for (int x=0; x<srcRect.w; ++x) {
-            Cell c = *src++;
-            if (c.tile != transparent.tile) {
-                *dest = combine(*dest, c, drawFlags);
-            }
-            ++dest;
-        }
-    }
-    // Tell everyone.
-    mEd.modified = true;
-    mDamageExtent.Merge(destRect);
-    for (auto l : mEd.listeners) {
-        l->ProjMapModified(mMapNum, destRect);
-    }
-}
-
 void MapDrawCmd::AddDamage(MapRect const& damage)
 {
     mEd.modified = true;
@@ -110,40 +21,6 @@ void MapDrawCmd::AddDamage(MapRect const& damage)
         l->ProjMapModified(mMapNum, damage);
     }
 }
-
-void MapDrawCmd::EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags)
-{
-    assert(State() == DONE);
-    Proj& proj = mEd.proj;
-    Tilemap& map = proj.maps[mMapNum];
-
-    // clip brush area on map
-    MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
-    // transform clipped area into brush space
-    MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
-
-    // copy
-    for (int y=0; y<srcRect.h; ++y) {
-        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
-        for (int x=0; x<srcRect.w; ++x) {
-            Cell c = *src++;
-            if (c.tile != transparent.tile) {
-                *dest = combine(*dest, transparent, drawFlags);
-            }
-            ++dest;
-        }
-    }
-    // Tell everyone.
-    mEd.modified = true;
-    mDamageExtent.Merge(destRect);
-    for (auto l : mEd.listeners) {
-        l->ProjMapModified(mMapNum, destRect);
-    }
-}
-
 
 void MapDrawCmd::Commit()
 {

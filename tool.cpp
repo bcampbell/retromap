@@ -1,5 +1,5 @@
 #include "cmd.h"
-#include "helpers.h"
+#include "draw.h"
 #include "tool.h"
 #include "proj.h"
 #include "mapview.h"
@@ -45,20 +45,22 @@ void DrawTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
         return;
     }
 
+    MapRect damage;
     if (b & LEFT) {
         if (mEd.useBrush) {
-            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
+            damage = DrawBrush(map, tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.leftPen, mEd.drawFlags);
+            damage = Plonk(map, tp, mEd.leftPen, mEd.drawFlags);
         }
     }
     if (b & RIGHT) {
         if (mEd.useBrush) {
-            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
+            damage = EraseBrush(map, tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.rightPen, mEd.drawFlags);
+            damage = Plonk(map, tp, mEd.rightPen, mEd.drawFlags);
         }
     }
+    mCmd->AddDamage(damage);
 }
 
 void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
@@ -88,20 +90,22 @@ void DrawTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
     }
     mPrevPos = tp;
 
+    MapRect damage;
     if (b & LEFT) {
         if (mEd.useBrush) {
-            mCmd->DrawBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
+            damage = DrawBrush(map, tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.leftPen, mEd.drawFlags);
+            damage = Plonk(map, tp, mEd.leftPen, mEd.drawFlags);
         }
     }
     if (b & RIGHT) {
         if (mEd.useBrush) {
-            mCmd->EraseBrush(tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
+            damage = EraseBrush(map, tp, mEd.brush, mEd.rightPen, mEd.drawFlags);
         } else {
-            mCmd->Plonk(tp, mEd.rightPen, mEd.drawFlags);
+            damage = Plonk(map, tp, mEd.rightPen, mEd.drawFlags);
         }
     }
+    mCmd->AddDamage(damage);
 }
 
 void DrawTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
@@ -211,19 +215,24 @@ void RectTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
         TilePoint tp = mProj.ToTilePoint(pos);
         mSelection = UpdateSelection(mAnchor, tp);
 
-        // go.
-        MapDrawCmd* cmd = new MapDrawCmd(mEd, mapNum);
+        Cell pen;
         if (mLatch & LEFT) {
-            cmd->DrawRect(mSelection, mEd.leftPen, mEd.drawFlags);
+            pen = mEd.leftPen;
+        } else if (mLatch & RIGHT) {
+            pen = mEd.rightPen;
+        } else {
+            return;
         }
-        if (mLatch & RIGHT) {
-            cmd->DrawRect(mSelection, mEd.rightPen, mEd.drawFlags);
-        }
-        cmd->Commit(); // no more drawing.
-        mEd.AddCmd(cmd);
-
         mLatch = 0;
         view->HideCursor();
+
+        // go.
+        MapDrawCmd* cmd = new MapDrawCmd(mEd, mapNum);
+        DrawRect(mProj.maps[mapNum], mSelection, pen, mEd.drawFlags);
+        cmd->AddDamage(mSelection);
+        cmd->Commit();
+        mEd.AddCmd(cmd);
+
     }
 }
 

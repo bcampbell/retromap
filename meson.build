@@ -6,8 +6,9 @@ qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'])
 #incdirs = include_directories('src')
 
 my_headers = [
-  'cmd.h',
   'charsetwidget.h',
+  'cmd.h',
+  'draw.h',
   'editor.h',
   'helpers.h',
   'mainwindow.h',
@@ -23,6 +24,7 @@ my_headers = [
 my_sources = [
   'charsetwidget.cpp',
   'cmd.cpp',
+  'draw.cpp',
   'editor.cpp',
   'helpers.cpp',
   'main.cpp',
