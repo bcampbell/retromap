@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include "cmd.h"
+#include "draw.h"
 #include "helpers.h"
 #include "mapwidget.h"
 #include "mapsizedialog.h"
@@ -255,6 +256,35 @@ void MainWindow::createActions()
         });
     }
 
+    //
+    {
+        QAction* a;
+        mActions.hFlipBrush = a = new QAction(tr("Flip Brush Horizontally"));
+        a->setShortcut(QKeySequence(Qt::Key_X));
+        connect(a, &QAction::triggered, this, [&]() {
+            if (mEd.brush.Bounds().IsEmpty()) {
+                return;
+            }
+            HFlip(mEd.brush);
+            for (auto l : mEd.listeners) {
+                l->EditorBrushChanged();
+            }
+        });
+
+        mActions.vFlipBrush = a = new QAction(tr("Flip Brush Vertically"));
+        a->setShortcut(QKeySequence(Qt::Key_Y));
+        connect(a, &QAction::triggered, this, [&]() {
+            if (mEd.brush.Bounds().IsEmpty()) {
+                return;
+            }
+            VFlip(mEd.brush);
+            for (auto l : mEd.listeners) {
+                l->EditorBrushChanged();
+            }
+        });
+    }
+
+
     // Draw modes
 
     {
@@ -322,6 +352,8 @@ void MainWindow::createMenus()
         m->addAction(mActions.floodFillTool);
         m->addSeparator();
         m->addAction(mActions.useCustomBrush);
+        m->addAction(mActions.hFlipBrush);
+        m->addAction(mActions.vFlipBrush);
         menuBar()->addMenu(m);
     }
     {

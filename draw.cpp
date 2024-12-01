@@ -1,6 +1,8 @@
 #include "draw.h"
 #include "editor.h"
 
+#include <algorithm>
+
 static Cell combine(Cell const& dest, Cell const& pen, int drawFlags)
 {
     return Cell{
@@ -161,4 +163,25 @@ MapRect EraseBrush(Tilemap& map, TilePoint const& pos, Tilemap const& brush, Cel
     return destRect;
 }
 
+
+void HFlip(Tilemap& map)
+{
+    auto x0 = map.cells.begin();
+    for (int y = 0; y < map.h; ++y) {
+        auto x1 = x0 + map.w;
+        std::reverse(x0, x1);
+        x0 = x1;    // next line
+    }
+}
+
+void VFlip(Tilemap& map)
+{
+    auto a = map.cells.begin();
+    auto b = a + (map.w * (map.h - 1)); // start of last line
+    for (int y = 0; y < map.h / 2; ++y) {
+        std::swap_ranges(a, a+map.w, b);
+        a += map.w;
+        b -= map.w;
+    }
+}
 

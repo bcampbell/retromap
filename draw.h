@@ -11,3 +11,7 @@ MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
 MapRect DrawBrush(Tilemap& map, TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags);
 MapRect EraseBrush(Tilemap& map, TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags);
 
+
+void HFlip(Tilemap& map);
+void VFlip(Tilemap& map);
+

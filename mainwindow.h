@@ -84,6 +84,8 @@ private:
        QAction* pickupTool{nullptr};
        QAction* floodFillTool{nullptr};
        QAction* useCustomBrush{nullptr};
+       QAction* hFlipBrush{nullptr};
+       QAction* vFlipBrush{nullptr};
        QAction* drawModeNormal{nullptr};
        QAction* drawModeTile{nullptr};
        QAction* drawModeInk{nullptr};
