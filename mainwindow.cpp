@@ -1,13 +1,14 @@
 #include "mainwindow.h"
 
+#include "charsetwidget.h"
 #include "cmd.h"
 #include "draw.h"
+#include "entwidget.h"
 #include "helpers.h"
 #include "mapwidget.h"
 #include "mapsizedialog.h"
 #include "palettewidget.h"
 #include "penwidget.h"
-#include "charsetwidget.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -66,6 +67,14 @@ void MainWindow::RethinkTitle()
         .arg((int)mEd.proj.maps.size())
         .arg(QString::fromStdString(mEd.mapFilename));
     setWindowTitle(t);
+}
+
+
+// 
+void MainWindow::MapNumChanged()
+{
+    mEntWidget->SetMapNum(mPresenter.CurrentMap());
+    RethinkTitle();
 }
 
 bool MainWindow::maybeSave()
@@ -164,7 +173,7 @@ void MainWindow::createActions()
         a->setShortcut(QKeySequence(Qt::Key_Up));
         connect(a, &QAction::triggered, [&](){
             mPresenter.MapNav2D(0, -1);
-            RethinkTitle();
+            MapNumChanged();
         });
         mActions.mapNorth = a;
         
@@ -172,7 +181,7 @@ void MainWindow::createActions()
         a->setShortcut(QKeySequence(Qt::Key_Down));
         connect(a, &QAction::triggered, [&](){
             mPresenter.MapNav2D(0, 1);
-            RethinkTitle();
+            MapNumChanged();
         });
         mActions.mapSouth = a;
 
@@ -180,28 +189,31 @@ void MainWindow::createActions()
         a->setShortcut(QKeySequence(Qt::Key_Left));
         connect(a, &QAction::triggered, [&](){
             mPresenter.MapNav2D(-1, 0);
-            RethinkTitle();
+            MapNumChanged();
         });
         mActions.mapWest = a;
 
         a = new QAction(tr("East"), this);
         a->setShortcut(QKeySequence(Qt::Key_Right));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNav2D(1, 0); RethinkTitle();
+            mPresenter.MapNav2D(1, 0);
+            MapNumChanged();
         });
         mActions.mapEast = a;
 
         a = new QAction(tr("Next"), this);
         a->setShortcut(QKeySequence(Qt::Key_Plus));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNavLinear(1); RethinkTitle();
+            mPresenter.MapNavLinear(1);
+            MapNumChanged();
         });
         mActions.mapNext = a;
 
         a = new QAction(tr("Previous"), this);
         a->setShortcut(QKeySequence(Qt::Key_Minus));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNavLinear(-1); RethinkTitle();
+            mPresenter.MapNavLinear(-1);
+            MapNumChanged();
         });
         mActions.mapPrev = a;
     }    
@@ -419,6 +431,11 @@ void MainWindow::createWidgets()
     mPaletteWidget->setLeftColour(mEd.leftPen.ink);
     mPaletteWidget->setRightColour(mEd.rightPen.ink);
 
+
+    // Set up Ent widget
+    mEntWidget = new EntWidget(this, mEd);
+    mEntWidget->SetMapNum(0);
+
     // Stupid QMainWindow requires a single central widget
     QWidget *central = new QWidget();
 
@@ -456,6 +473,8 @@ void MainWindow::createWidgets()
         scroll->setWidget(mCharsetWidget);
         h->addWidget(scroll, Qt::AlignLeading);
     }
+    h->addWidget(mEntWidget, Qt::AlignLeading);
+
     top->addLayout(h);
     setCentralWidget(central);
 

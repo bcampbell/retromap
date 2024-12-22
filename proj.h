@@ -65,6 +65,29 @@ struct MapRect
 inline bool operator==(MapRect const& a, MapRect const& b)
     {return a.pos == b.pos && a.w == b.w && a.h == b.h;}
 
+
+struct EntAttr
+{
+    std::string name;
+    std::string value;
+};
+
+// An entity is just a set of name/value pairs.
+struct Ent
+{
+    std::vector<EntAttr> attrs;
+
+    std::string ToString() const;
+    void FromString(std::string const& s);
+    bool HasGeometry() const;
+};
+
+
+
+
+
+
+
 // A Map.
 // Just an rectangular array of cells, with some members to make access
 // easier.
@@ -73,6 +96,8 @@ struct Tilemap
     int w;
     int h;
     std::vector<Cell> cells;
+
+    std::vector<Ent> ents;
 
     bool IsValid(TilePoint const& tp) const {
         return Bounds().Contains(tp);

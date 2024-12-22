@@ -96,3 +96,47 @@ private:
     Tilemap mOther;
 };
 
+class InsertEntsCmd : public Cmd
+{
+public:
+    InsertEntsCmd() = delete;
+    InsertEntsCmd(Editor& ed, int mapNum, std::vector<Ent> const& newEnts, int pos) :
+        Cmd(ed), mMapNum(mapNum), mPos(pos), mNewEnts(newEnts) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    int mMapNum;
+    int mPos;
+    std::vector<Ent> mNewEnts;
+};
+
+class DeleteEntsCmd : public Cmd
+{
+public:
+    DeleteEntsCmd() = delete;
+    DeleteEntsCmd(Editor& ed, int mapNum, int pos, int count) :
+        Cmd(ed), mMapNum(mapNum), mPos(pos), mCount(count) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    int mMapNum;
+    int mPos;
+    int mCount;
+    std::vector<Ent> mBackup;   // Store removed Ents for undo.
+};
+
+
+class EditEntCmd : public Cmd
+{
+public:
+    EditEntCmd() = delete;
+    EditEntCmd(Editor& ed, int mapNum, Ent const& newData, int entNum) :
+        Cmd(ed), mMapNum(mapNum), mEnt(newData), mEntNum(entNum) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    int mMapNum;
+    Ent mEnt;
+    int mEntNum;
+};
+

@@ -164,6 +164,7 @@ void ReplaceCharsetCmd::Do()
 void ReplaceCharsetCmd::Undo()
 {
     Do();
+    mState = NOT_DONE;
 }
 
 //
@@ -194,6 +195,99 @@ void ResizeMapCmd::Do()
 void ResizeMapCmd::Undo()
 {
     Swap();
+    mState = NOT_DONE;
+}
+
+//
+// InsertEntsCmd
+//
+void InsertEntsCmd::Do()
+{
+    Tilemap& map = mEd.GetMap(mMapNum);
+
+    assert(mPos >= 0 && mPos <= (int)map.ents.size());
+    auto dest = map.ents.begin() + mPos;
+    map.ents.insert(dest, mNewEnts.begin(), mNewEnts.end());
+    for (auto l : mEd.listeners) {
+        l->ProjEntsInserted(mMapNum, mPos, mNewEnts.size());
+    }
+
+    mEd.modified = true;
+    mState = DONE;
+}
+
+void InsertEntsCmd::Undo()
+{
+    Tilemap& map = mEd.proj.maps[mMapNum];
+    map.ents.erase(map.ents.begin() + mPos, map.ents.begin() + mPos + mNewEnts.size());
+    for (auto l : mEd.listeners) {
+        l->ProjEntsRemoved(mMapNum, mPos, mNewEnts.size());
+    }
+    mState = NOT_DONE;
+}
+
+//
+// DeleteEntsCmd
+//
+void DeleteEntsCmd::Do()
+{
+    auto& ents = mEd.GetMap(mMapNum).ents;
+
+    assert(mPos >= 0 && mPos <= (int)ents.size());
+    assert((mPos + mCount) <= (int)ents.size());
+
+    // Remove affected ents to mBackup.
+    auto beginIt = ents.begin() + mPos;
+    auto endIt = ents.begin() + mPos + mCount;
+    mBackup.reserve(endIt - beginIt);
+    mBackup.clear();
+    std::move(beginIt, endIt, std::back_inserter(mBackup));
+    ents.erase(beginIt, endIt);
+
+    // Tell everyone.
+    for (auto l : mEd.listeners) {
+        l->ProjEntsRemoved(mMapNum, mPos, mCount);
+    }
+
+    mEd.modified = true;
+    mState = DONE;
+}
+
+void DeleteEntsCmd::Undo()
+{
+    assert(mCount == (int)mBackup.size());
+    auto& ents = mEd.GetMap(mMapNum).ents;
+    ents.insert(ents.begin() + mPos, mBackup.begin(), mBackup.end());
+    mBackup.clear();
+    for (auto l : mEd.listeners) {
+        l->ProjEntsInserted(mMapNum, mPos, mCount);
+    }
+
+    mEd.modified = true;
+    mState = NOT_DONE;
+}
+
+
+//
+// EditEntCmd
+//
+void EditEntCmd::Do()
+{
+    assert(mMapNum >=0 && mMapNum < (int)mEd.proj.maps.size());
+    Tilemap& map = mEd.proj.maps[mMapNum];
+
+    std::swap(map.ents[mEntNum], mEnt);
+    for (auto l : mEd.listeners) {
+        l->ProjEntChanged(mMapNum, mEntNum, mEnt, map.ents[mEntNum]);
+    }
+
+    mEd.modified = true;
+    mState = DONE;
+}
+
+void EditEntCmd::Undo()
+{
+    Do();
     mState = NOT_DONE;
 }
 

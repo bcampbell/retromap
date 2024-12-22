@@ -1,5 +1,7 @@
 #include "proj.h"
 
+#include <format>
+#include <algorithm>
 
 void MapRect::Merge(MapRect const& other) {
     if (IsEmpty()) {
@@ -162,4 +164,44 @@ bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end)
 }
 
 
+
+// Ent implementation
+std::string Ent::ToString() const
+{
+    std::string out;
+    for (auto const& a : attrs) {
+        // TODO: percent-encode things!
+        out += std::format("{}={} ", a.name, a.value);
+    }
+    return out;
+}
+
+void Ent::FromString(std::string const& s)
+{
+    auto it = s.begin();
+    auto end = s.end();
+
+    auto is_space = [](char c) -> bool {return c == ' ';};
+    while(it != end) {
+        const auto name = std::find_if_not(it, end, is_space); // skip space
+        if (name == end) {
+            break;
+        }
+
+        const auto equals = std::find(name, end, '=');
+        if (equals == end) {
+            break;
+        }
+        it = equals + 1;    // skip '='
+        const auto val = std::find_if_not(it, end, is_space);   // skip space
+        it = std::find_if(val, end, is_space);
+        // blank values are OK.
+
+        EntAttr attr;
+        attr.name = std::string(name, equals);
+        attr.value = std::string(val, it);
+
+        attrs.push_back(attr);
+    }
+}
 

@@ -7,10 +7,11 @@
 #include "editor.h"
 #include "mapeditor.h"
 
+class CharsetWidget;
+class EntWidget;
 class MapWidget;
 class PaletteWidget;
 class PenWidget;
-class CharsetWidget;
 class QAction;
 class QLabel;
 
@@ -50,6 +51,7 @@ private:
     bool maybeSave();
 
     void RethinkTitle();
+    void MapNumChanged();
 
     // The editor state
     Editor& mEd;
@@ -59,6 +61,7 @@ private:
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;
+    EntWidget* mEntWidget;
     QLabel* mCursorMsg;
     struct {
        QAction* importCharset{nullptr};

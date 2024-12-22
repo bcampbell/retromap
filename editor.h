@@ -24,6 +24,11 @@ public:
     virtual void ProjMapsInserted(int mapNum, int count) {};
     // Moves any following maps back.
     virtual void ProjMapsRemoved(int mapNum, int count) {};
+
+
+    virtual void ProjEntsInserted(int mapNum, int entNum, int count) {};
+    virtual void ProjEntsRemoved(int mapNum, int entNum, int count) {};
+    virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData) {};
 };
 
 
@@ -67,6 +72,18 @@ public:
     void Redo();
 
     void SetTool(int toolKind);
+
+
+    // Some accessors with asserts.
+    Tilemap& GetMap(int mapNum) {
+        assert(mapNum>=0 && mapNum < (int)proj.maps.size());
+        return proj.maps[mapNum];
+    }
+    Ent& GetEnt(int mapNum, int entNum) {
+        Tilemap& map = GetMap(mapNum);
+        assert(entNum >=0 && entNum < (int)map.ents.size());
+        return map.ents[entNum];
+    }
 };
 
 
