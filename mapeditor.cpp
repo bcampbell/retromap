@@ -91,20 +91,22 @@ void MapEditor::ProjNuke()
 
 void MapEditor::ProjMapsInserted(int first, int count)
 {
-    if (mCurMap >= first) {
-        SetCurrentMap(mCurMap + count);
-    }
+    int n = mCurMap >= first ? mCurMap : mCurMap + count;
+    SetCurrentMap(n);
 }
 
 void MapEditor::ProjMapsRemoved(int first, int count)
 {
-    if (mCurMap >= first+count) {
-        SetCurrentMap(mCurMap - count);
-        return;
+    int n = mCurMap;
+   
+    if (n >= first + count) {
+        n -= count;
     }
-    if (mCurMap >= first) {
-        SetCurrentMap(std::min(int(mProj.maps.size()) - 1, first));
+    if (n >= first) {
+        n = std::min(int(mProj.maps.size()) - 1, first);
     }
+
+    SetCurrentMap(n);
 }
 
 void MapEditor::ProjCharsetModified()

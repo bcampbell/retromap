@@ -20,9 +20,9 @@ public:
     virtual void ProjMapModified(int mapNum, MapRect const& dirty) {};
     // Assume everything changed.
     virtual void ProjNuke() {};
-    // Moves any following maps upward.
+    // Moves any following maps upward (assume all maps moved in memory!).
     virtual void ProjMapsInserted(int mapNum, int count) {};
-    // Moves any following maps back.
+    // Moves any following maps back (assume all maps have shifted in memory!).
     virtual void ProjMapsRemoved(int mapNum, int count) {};
 
 
