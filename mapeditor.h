@@ -35,7 +35,9 @@ public:
     virtual void ProjNuke();
     virtual void ProjMapsInserted(int first, int count);
     virtual void ProjMapsRemoved(int first, int count);
-
+    virtual void ProjEntsInserted(int mapNum, int entNum, int count);
+    virtual void ProjEntsRemoved(int mapNum, int entNum, int count);
+    virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
 private:
     Editor& mEd;
     std::set<MapView*> mViews;

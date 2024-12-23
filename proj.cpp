@@ -205,3 +205,34 @@ void Ent::FromString(std::string const& s)
     }
 }
 
+std::string Ent::Get(std::string const& name) const
+{
+    for (auto const& attr : attrs) {
+        if (attr.name == name) {
+            return attr.value;
+        }
+    }
+    return std::string();
+}
+
+
+int Ent::GetAsInt(std::string const& name) const
+{
+    auto s = Get(name);
+    int i = 0;
+    std::from_chars(s.data(), s.data() + s.size(), i);
+    return i;
+}
+
+
+
+MapRect Ent::Geometry() const
+{
+    return MapRect(
+            GetAsInt("x"),
+            GetAsInt("y"),
+            GetAsInt("w"),
+            GetAsInt("h")
+            );
+}
+

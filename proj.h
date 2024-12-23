@@ -57,6 +57,15 @@ struct Rect
     bool IsEmpty() const {return w == 0 || h == 0;}
 };
 
+// A rectangle in pixel coords.
+struct PixRect : public Rect
+{
+    PixRect() = default;
+    PixRect(PixPoint const& topleft, int width, int height) : Rect(topleft.x, topleft.y, width, height)
+        {};
+    PixRect(int xpos, int ypos, int width, int height) : Rect(xpos, ypos, width, height)
+        {};
+};
 
 // A rectangular area on a map, in tile coords.
 struct MapRect : public Rect
@@ -96,7 +105,14 @@ struct Ent
 
     std::string ToString() const;
     void FromString(std::string const& s);
-    bool HasGeometry() const;
+    
+    // Retrieve named attr, returns "" if not found.
+    std::string Get(std::string const& name) const;
+    // Retrieve named attr as an int. Returns 0 if not found or not numeric.
+    int GetAsInt(std::string const& name) const;
+    // Return shape, if any.
+    // TODO: which attrs are used?
+    MapRect Geometry() const;
 };
 
 

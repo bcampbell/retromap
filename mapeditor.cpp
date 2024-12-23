@@ -113,6 +113,33 @@ void MapEditor::ProjCharsetModified()
     ProjMapModified(mCurMap, map.Bounds());
 }
 
+void MapEditor::ProjEntsInserted(int mapNum, int entNum, int count)
+{
+    if (mapNum == mCurMap) {
+        for (auto view : mViews) {
+            view->EntsModified();
+        }
+    }
+}
+
+void MapEditor::ProjEntsRemoved(int mapNum, int entNum, int count)
+{
+    if (mapNum == mCurMap) {
+        for (auto view : mViews) {
+            view->EntsModified();
+        }
+    }
+}
+
+void MapEditor::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData)
+{
+    if (mapNum == mCurMap) {
+        for (auto view : mViews) {
+            view->EntsModified();
+        }
+    }
+}
+
 
 void MapEditor::Press(MapView* view, PixPoint const& pt, int button)
 {

@@ -99,6 +99,12 @@ void MapWidget::MapModified(MapRect const& dirty)
     }
 }
 
+void MapWidget::EntsModified()
+{
+    // redraw all
+    update();
+}
+
 void MapWidget::UpdateBacking(MapRect const& dirty)
 {
     if (!IsValidMap()) {
@@ -250,6 +256,32 @@ void MapWidget::paintEvent(QPaintEvent *event)
                     painter.drawText(bound, Qt::AlignCenter, t);
                 }
             }
+        }
+    }
+
+    // Draw ents
+    {
+        for (auto const& ent : mTilemap->ents) {
+            MapRect entBound = ent.Geometry();
+            if (entBound.IsEmpty()) {
+                continue;
+            }
+            QRect bound = FromMap(entBound);
+            QPen p(Qt::blue,1);
+            painter.setPen(p);
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRect(bound);
+
+            QPen blackPen(Qt::black,1);
+            painter.setPen(blackPen);
+            painter.drawRect(bound.adjusted(1,1,-1,-1));
+            painter.drawRect(bound.adjusted(-1,-1,1,1));
+
+            auto label = QString::fromStdString(ent.Get("kind"));
+            painter.setPen(QColor(0,0,255,128));
+            painter.drawText(bound.adjusted(2,2,0,0), Qt::AlignCenter, label);
+            painter.setPen(QColor(255,255,255,128));
+            painter.drawText(bound, Qt::AlignCenter, label);
         }
     }
 

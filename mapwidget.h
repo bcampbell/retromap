@@ -30,6 +30,7 @@ public:
     virtual void SetPresenter(MapEditor* presenter);
     virtual void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
     virtual void MapModified(MapRect const& dirty);
+    virtual void EntsModified();
     virtual void SetCursor(MapRect const& area);
     virtual void HideCursor();
 
