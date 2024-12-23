@@ -413,7 +413,7 @@ void MainWindow::createWidgets()
         // Show the cursor position on the status bar.
         QString msg;
         if(!cursor.IsEmpty()) {
-            msg = QString("%1,%2 (%3x%4)").arg(cursor.pos.x).arg(cursor.pos.y).arg(cursor.w).arg(cursor.h);
+            msg = QString("%1,%2 (%3x%4)").arg(cursor.x).arg(cursor.y).arg(cursor.w).arg(cursor.h);
         }
         mCursorMsg->setText(msg);
     });

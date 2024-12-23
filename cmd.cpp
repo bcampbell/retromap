@@ -27,7 +27,7 @@ void MapDrawCmd::Commit()
     // Trim down saved area to just that which was changed.
     // Just so we don't save a copy of the whole map for every edit!
     assert(State() == DONE);
-    mBackupPos = mDamageExtent.pos;
+    mBackupPos = mDamageExtent.Pos();
     mBackup = mBackup.Copy(mDamageExtent);
 }
 

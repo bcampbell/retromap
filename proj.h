@@ -43,27 +43,44 @@ struct PixPoint : public Point
 };
 
 
-// A rectangular area on a map, in tile coords.
-struct MapRect
+
+// Base Rect, no units.
+struct Rect
 {
-    TilePoint pos;
+    Rect() = default;
+    Rect(int xpos, int ypos, int width, int height) : x(xpos), y(ypos), w(width), h(height)
+        {}
+    int x{0};
+    int y{0};
     int w{0};
     int h{0};
-    bool IsEmpty() const {return w == 0 && h == 0;}
+    bool IsEmpty() const {return w == 0 || h == 0;}
+};
+
+
+// A rectangular area on a map, in tile coords.
+struct MapRect : public Rect
+{
+    MapRect() = default;
+    MapRect(TilePoint const& topleft, int width, int height) : Rect(topleft.x, topleft.y, width, height)
+        {};
+    MapRect(int xpos, int ypos, int width, int height) : Rect(xpos, ypos, width, height)
+        {};
+    TilePoint Pos() const {return TilePoint(x, y);}
     void Translate(TilePoint const& delta)
-        {pos.x += delta.x; pos.y += delta.y;}
+        {x += delta.x; y += delta.y;}
     void Merge(MapRect const& other);
     void Merge(TilePoint const& point);
     bool Contains(TilePoint const& point) const
     {
-        return point.x >= pos.x && point.x < pos.x + w &&
-            point.y >= pos.y && point.y < pos.y + h;
+        return point.x >= x && point.x < x + w &&
+            point.y >= y && point.y < y + h;
     }
     MapRect Clip(MapRect const& r) const;
 };
 
 inline bool operator==(MapRect const& a, MapRect const& b)
-    {return a.pos == b.pos && a.w == b.w && a.h == b.h;}
+    {return a.x == b.x && a.w == b.w && a.h == b.h;}
 
 
 struct EntAttr
@@ -122,7 +139,7 @@ struct Tilemap
 
     // Return a bounding rect for the map.
     MapRect Bounds() const {
-        return MapRect(TilePoint(0, 0), w, h);
+        return MapRect(0, 0, w, h);
     }
 
     // Return area r of as a new tilemap.

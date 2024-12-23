@@ -25,12 +25,12 @@ MapRect DrawRect(Tilemap& map, MapRect const& area, Cell const& pen, int drawFla
     MapRect destRect = map.Bounds().Clip(area);
     // transform clipped area into brush space
     MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
+    srcRect.x -= destRect.x;
+    srcRect.y -= destRect.y;
 
     // do it
     for (int y=0; y<srcRect.h; ++y) {
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        Cell *dest = map.CellPtr(TilePoint(destRect.x, destRect.y + y));
         for (int x=0; x<srcRect.w; ++x) {
             *dest = combine(*dest, pen, drawFlags);
             ++dest;
@@ -121,13 +121,13 @@ MapRect DrawBrush(Tilemap& map, TilePoint const& pos, Tilemap const& brush, Cell
     MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
     // transform clipped area into brush space
     MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
+    srcRect.x -= destRect.x;
+    srcRect.y -= destRect.y;
 
     // copy
     for (int y=0; y<srcRect.h; ++y) {
-        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.x, srcRect.y + y));
+        Cell *dest = map.CellPtr(TilePoint(destRect.x, destRect.y + y));
         for (int x=0; x<srcRect.w; ++x) {
             Cell c = *src++;
             if (c.tile != transparent.tile) {
@@ -145,13 +145,13 @@ MapRect EraseBrush(Tilemap& map, TilePoint const& pos, Tilemap const& brush, Cel
     MapRect destRect = map.Bounds().Clip(MapRect(pos, brush.w, brush.h));
     // transform clipped area into brush space
     MapRect srcRect = destRect;
-    srcRect.pos.x -= destRect.pos.x;
-    srcRect.pos.y -= destRect.pos.y;
+    srcRect.x -= destRect.x;
+    srcRect.y -= destRect.y;
 
     // copy
     for (int y=0; y<srcRect.h; ++y) {
-        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.pos.x, srcRect.pos.y + y));
-        Cell *dest = map.CellPtr(TilePoint(destRect.pos.x, destRect.pos.y + y));
+        Cell const *src = brush.CellPtrConst(TilePoint(srcRect.x, srcRect.y + y));
+        Cell *dest = map.CellPtr(TilePoint(destRect.x, destRect.y + y));
         for (int x=0; x<srcRect.w; ++x) {
             Cell c = *src++;
             if (c.tile != transparent.tile) {
@@ -179,7 +179,7 @@ void VFlip(Tilemap& map)
     auto a = map.cells.begin();
     auto b = a + (map.w * (map.h - 1)); // start of last line
     for (int y = 0; y < map.h / 2; ++y) {
-        std::swap_ranges(a, a+map.w, b);
+        std::swap_ranges(a, a + map.w, b);
         a += map.w;
         b -= map.w;
     }

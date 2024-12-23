@@ -42,7 +42,7 @@ void MapWidget::SetMap(Tilemap* tilemap, Charset* charset, Palette* palette)
 QRect MapWidget::FromMap(MapRect const& r) const {
     int tw = mCharset->tw;
     int th = mCharset->th;
-    return QRect(r.pos.x * tw * mZoom, r.pos.y * th * mZoom,
+    return QRect(r.x * tw * mZoom, r.y * th * mZoom,
         r.w * tw * mZoom, r.h * th * mZoom);
 }
 
@@ -51,7 +51,8 @@ MapRect MapWidget::ToMap(QRectF const& r) const {
     int th = mCharset->th * mZoom;
 
     MapRect out;
-    out.pos = TilePoint(r.x() / tw, r.y() / th);
+    out.x = r.x() / tw;
+    out.y = r.y() / th;
     // We want all overlapping tiles, not just contained ones.
     out.w = (r.width() + tw - 1) / tw;
     out.h = (r.height() + th - 1) / th;
@@ -113,8 +114,8 @@ void MapWidget::UpdateBacking(MapRect const& dirty)
     }
 
     // Draw affected area into backing image.
-    for (int y = dirty.pos.y; y < dirty.pos.y + dirty.h; ++y) {
-        for (int x = dirty.pos.x; x < dirty.pos.x + dirty.w; ++x) {
+    for (int y = dirty.y; y < dirty.y + dirty.h; ++y) {
+        for (int x = dirty.x; x < dirty.x + dirty.w; ++x) {
             Cell const& cell = mTilemap->CellAt(TilePoint(x, y));
             RenderCell(mBacking, QPoint(x * tw, y * th), *mCharset, *mPalette, cell);
         }
@@ -218,19 +219,19 @@ void MapWidget::paintEvent(QPaintEvent *event)
             painter.setPen(gridPen);
             int tw = mCharset->tw * mZoom;
             int th = mCharset->th * mZoom;
-            for (int y = m.pos.y; y <= m.pos.y + m.h; ++y) {
-                QPoint p1(m.pos.x * tw, y * th);
-                QPoint p2((m.pos.x + m.w) *tw, y * th);
+            for (int y = m.y; y <= m.y + m.h; ++y) {
+                QPoint p1(m.x * tw, y * th);
+                QPoint p2((m.x + m.w) *tw, y * th);
                 painter.drawLine(p1, p2);
             }
-            for (int x = m.pos.x; x <= m.pos.x + m.w; ++x) {
-                QPoint p1(x * tw, m.pos.y * th);
-                QPoint p2(x * tw, (m.pos.y + m.h) * th);
+            for (int x = m.x; x <= m.x + m.w; ++x) {
+                QPoint p1(x * tw, m.y * th);
+                QPoint p2(x * tw, (m.y + m.h) * th);
                 painter.drawLine(p1, p2);
             }
 
-            for (int y = m.pos.y; y < m.pos.y + m.h; ++y) {
-                for (int x = m.pos.x; x < m.pos.x + m.w; ++x) {
+            for (int y = m.y; y < m.y + m.h; ++y) {
+                for (int x = m.x; x < m.x + m.w; ++x) {
                     TilePoint tp(x, y);
 
                     QRect bound = FromMap(MapRect(tp, 1, 1));

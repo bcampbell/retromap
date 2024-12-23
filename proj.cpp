@@ -8,15 +8,15 @@ void MapRect::Merge(MapRect const& other) {
         *this = other;
         return;
     }
-    int xmin = std::min(pos.x, other.pos.x);
-    int xmax = std::max(pos.x + w, other.pos.x + other.w);
-    int ymin = std::min(pos.y, other.pos.y);
-    int ymax = std::max(pos.y + h, other.pos.y + other.h);
+    int xmin = std::min(x, other.x);
+    int xmax = std::max(x + w, other.x + other.w);
+    int ymin = std::min(y, other.y);
+    int ymax = std::max(y + h, other.y + other.h);
 
-    pos.x = xmin;
-    pos.y = ymin;
-    w = xmax-xmin;
-    h = ymax-ymin;
+    x = xmin;
+    y = ymin;
+    w = xmax - xmin;
+    h = ymax - ymin;
 }
 
 void MapRect::Merge(TilePoint const& point)
@@ -26,10 +26,10 @@ void MapRect::Merge(TilePoint const& point)
 
 MapRect MapRect::Clip(MapRect const& r) const
 {
-    int left = std::max(0, r.pos.x);
-    int right = std::min(w, r.pos.x + r.w);
-    int top = std::max(0, r.pos.y);
-    int bottom = std::min(h, r.pos.y + r.h);
+    int left = std::max(0, r.x);
+    int right = std::min(w, r.x + r.w);
+    int top = std::max(0, r.y);
+    int bottom = std::min(h, r.y + r.h);
 
     return MapRect(TilePoint(left,top), right - left, bottom - top);
 }
@@ -45,7 +45,7 @@ Tilemap Tilemap::Copy(MapRect const& r) const
         Cell* dest = out.CellPtr(TilePoint(0,y));
         for (int x = 0; x < r.w; ++x) {
             // Slow and naive per-tile clipping, but nice and simple :-)
-            TilePoint srcPos(r.pos.x + x, r.pos.y + y);
+            TilePoint srcPos(r.x + x, r.y + y);
             if (Bounds().Contains(srcPos)) {
                 *dest = CellAt(srcPos);
             }
