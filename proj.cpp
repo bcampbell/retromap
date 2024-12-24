@@ -61,8 +61,22 @@ static void PushU16LE(std::vector<uint8_t>& out, uint16_t v) {
     out.push_back(v >> 8);
 }
 
+static void PushU8(std::vector<uint8_t>& out, uint8_t v) {
+    out.push_back(v);
+}
 
-void WriteProj(Proj const& proj, std::vector<uint8_t>& out)
+static void PushString(std::vector<uint8_t>& out, std::string const& s) {
+    assert(s.size() <= 255);
+    PushU8(out, (uint8_t)s.size());
+    for (char c : s) {
+        PushU8(out, (uint8_t)c);
+    }
+}
+
+
+// We'll just keep adding new write functions as the data changes, then
+// ditch a bunch at some point and call it v1 :-)
+void WriteProjR1(Proj const& proj, std::vector<uint8_t>& out)
 {
     // Magic cookie/version
     out.push_back('r');
@@ -97,12 +111,88 @@ void WriteProj(Proj const& proj, std::vector<uint8_t>& out)
     }
 }
 
+
+// Same as R1 but with ents.
+void WriteProjR2(Proj const& proj, std::vector<uint8_t>& out)
+{
+    // Magic cookie/version
+    out.push_back('r');
+    out.push_back('2');
+
+    // Reserve a count for (optional) ent templates.
+    PushU16LE(out, 0);
+
+    // Write out maps.
+    PushU16LE(out, (uint16_t)proj.maps.size());
+    for (auto& map : proj.maps) {
+        PushU16LE(out, (uint16_t)map.w);
+        PushU16LE(out, (uint16_t)map.h);
+        for(auto& cell : map.cells) {
+            PushU16LE(out, cell.tile);
+            out.push_back(cell.ink);
+            out.push_back(cell.paper);
+        }
+
+        // Write number of ents.
+        assert(map.ents.size() <= 255);
+        PushU8(out, map.ents.size());
+        for( auto const& ent: map.ents) {
+            // Num of attrs.
+            assert(ent.attrs.size() <= 255);
+            PushU8(out, ent.attrs.size());
+            // Attrs.
+            for (auto const& attr : ent.attrs) {
+                PushString(out, attr.name);
+                PushString(out, attr.value);
+            }
+        }
+    }
+
+    // Write charset
+    Charset const& tiles = proj.charset;
+    {
+        out.push_back((uint8_t)tiles.tw);
+        out.push_back((uint8_t)tiles.th);
+        PushU16LE(out, (uint16_t)tiles.ntiles);
+        out.insert(out.end(), tiles.images.begin(), tiles.images.end());
+    }
+
+    // Write palette
+    Palette const& palette = proj.palette;
+    {
+        PushU16LE(out, (uint16_t)palette.ncolours);
+        out.insert(out.end(), palette.colours.begin(), palette.colours.end());
+    }
+}
+
+void WriteProj(Proj const& proj, std::vector<uint8_t>& out)
+{
+    WriteProjR2(proj, out);
+}
+
+
+
 bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end)
 {
     // Check magic cookie.
     if((end - p) < 2) { return false; }
-    if (p[0] != 'r' || p[1] != '1') { return false; }
+    if (p[0] != 'r') {
+        return false;
+    }
+    char version;
+    switch (p[1]) {
+        case '1': version = 1; break;
+        case '2': version = 2; break;
+        default: return false;
+    }
     p += 2;
+
+    // number of ent templates (not yet used)
+    if (version == 2) {
+        if((end - p) < 2) { return false; }
+        //int numEntTemplates = (p[1]<<8) + p[0];
+        p += 2;
+    }
 
     // Read maps.
     if((end - p) < 2) { return false; }
@@ -125,6 +215,37 @@ bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end)
             cell.ink = *p++;
             cell.paper = *p++;
         }
+
+        // R2 has ents
+        if (version == 2) {
+            if (end - p < 1) {return false;}
+            int numEnts = *p++;
+            map.ents.resize(numEnts);
+            for (Ent& ent : map.ents) {
+                if (end - p < 1) {return false;}
+                int numAttrs = (int)*p++;
+                ent.attrs.resize(numAttrs);
+                for (EntAttr& attr : ent.attrs) {
+                    // read name
+                    {
+                        if (end - p < 1) {return false;}
+                        int n = (int)*p++;
+                        if (end - p < n) {return false;}
+                        attr.name = std::string(p, p + n);
+                        p += n;
+                    }
+                    // read value
+                    {
+                        if (end - p < 1) {return false;}
+                        int n = (int)*p++;
+                        if (end - p < n) {return false;}
+                        attr.value = std::string(p, p + n);
+                        p += n;
+                    }
+                }
+            }
+        }
+
         proj.maps.push_back(map);
     }
     // Read charset.
