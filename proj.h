@@ -39,6 +39,7 @@ inline bool operator==(TilePoint const& a, TilePoint const& b)
 // A position on a map, in map pixels.
 struct PixPoint : public Point
 {
+    PixPoint() : Point(0, 0) {}
     PixPoint(int xpos, int ypos) : Point(xpos,ypos) {}
 };
 
@@ -65,6 +66,11 @@ struct PixRect : public Rect
         {};
     PixRect(int xpos, int ypos, int width, int height) : Rect(xpos, ypos, width, height)
         {};
+    bool Contains(PixPoint const& point) const
+    {
+        return point.x >= x && point.x < x + w &&
+            point.y >= y && point.y < y + h;
+    }
 };
 
 // A rectangular area on a map, in tile coords.
@@ -89,7 +95,7 @@ struct MapRect : public Rect
 };
 
 inline bool operator==(MapRect const& a, MapRect const& b)
-    {return a.x == b.x && a.w == b.w && a.h == b.h;}
+    {return a.x == b.x && a.y == b.y && a.w == b.w && a.h == b.h;}
 
 
 struct EntAttr
@@ -107,9 +113,13 @@ struct Ent
     void FromString(std::string const& s);
     
     // Retrieve named attr, returns "" if not found.
-    std::string Get(std::string const& name) const;
+    std::string GetAttr(std::string const& name) const;
     // Retrieve named attr as an int. Returns 0 if not found or not numeric.
-    int GetAsInt(std::string const& name) const;
+    int GetAttrInt(std::string const& name) const;
+
+    void SetAttr(std::string const& name, std::string const& value);
+    void SetAttrInt(std::string const& name, int value);
+
     // Return shape, if any.
     // TODO: which attrs are used?
     MapRect Geometry() const;
@@ -205,4 +215,8 @@ struct Proj
 
 void WriteProj(Proj const& proj, std::vector<uint8_t>& out);
 bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end);
+
+
+// Return ent index at pos, or -1 if none.
+int PickEnt(Proj const& proj, int mapNum, PixPoint const& pos);
 

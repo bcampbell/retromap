@@ -13,6 +13,7 @@ class Editor;
 //#define TOOL_BRUSH ???
 #define TOOL_RECT 2
 #define TOOL_FLOODFILL 3
+#define TOOL_ENT 4
 // Yes. Should be an enum. Patches welcome.
 
 class Tool
@@ -111,5 +112,27 @@ public:
     virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
+};
+
+
+// Tool for moving/sizing ents
+class EntTool : public Tool
+{
+public:
+    EntTool() = delete;
+    EntTool(Editor& ed) : Tool(ed) {}
+    virtual ~EntTool() {}
+
+    virtual int Kind() const {return TOOL_ENT;}
+    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Reset();
+private:
+    enum Handle {NONE, MOVE, TOPLEFT, TOP, TOPRIGHT, RIGHT, BOTTOMRIGHT, BOTTOM, BOTTOMLEFT, LEFT};
+
+    int mEnt{-1};
+    Handle mHandle{NONE};
+    PixPoint mAnchor;
 };
 

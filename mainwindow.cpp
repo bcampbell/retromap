@@ -251,6 +251,13 @@ void MainWindow::createActions()
         connect(a, &QAction::triggered, this, [self=this]() {
             self->mEd.SetTool(TOOL_FLOODFILL);
         });
+
+        mActions.entTool = a = new QAction(tr("Ent Placement"), toolGroup);
+        a->setCheckable(true);
+        a->setShortcut(QKeySequence(Qt::Key_E));
+        connect(a, &QAction::triggered, this, [self=this]() {
+            self->mEd.SetTool(TOOL_ENT);
+        });
     }
 
     {
@@ -362,6 +369,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.rectTool);
         m->addAction(mActions.pickupTool);
         m->addAction(mActions.floodFillTool);
+        m->addAction(mActions.entTool);
         m->addSeparator();
         m->addAction(mActions.useCustomBrush);
         m->addAction(mActions.hFlipBrush);
@@ -456,6 +464,7 @@ void MainWindow::createWidgets()
         toolbar->addAction(mActions.rectTool);
         toolbar->addAction(mActions.pickupTool);
         toolbar->addAction(mActions.floodFillTool);
+        toolbar->addAction(mActions.entTool);
         v->addWidget(toolbar, Qt::AlignLeading);
 
         QToolBar *drawModeBar = new QToolBar(this);
@@ -700,6 +709,11 @@ void MainWindow::EditorToolChanged()
     case TOOL_FLOODFILL:
         if (!mActions.floodFillTool->isChecked()) {
             mActions.floodFillTool->setChecked(true);
+        }
+        break;
+    case TOOL_ENT:
+        if (!mActions.entTool->isChecked()) {
+            mActions.entTool->setChecked(true);
         }
         break;
     }

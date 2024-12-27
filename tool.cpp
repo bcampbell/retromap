@@ -286,3 +286,70 @@ void FloodFillTool::Reset()
 {
 }
 
+
+//
+// EntTool
+//
+
+
+void EntTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+//    TilePoint tp = mProj.ToTilePoint(pos);
+//    if (!map.IsValid(tp)) {
+//        return;
+//    }
+
+    int e = PickEnt(mProj, mapNum, pos);
+    if (e == -1) {
+        return;
+    }
+
+    mEnt = e;
+    mHandle = MOVE;
+    mAnchor = pos;
+    // TODO:  store mapnum!
+
+    Move(view, mapNum, pos, b);
+//    mSelection = UpdateSelection(mAnchor, mAnchor);
+//    view->SetCursor(mSelection);
+}
+
+void EntTool::Move(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+    if (mHandle == MOVE && mEnt != -1) {
+        TilePoint tp = mProj.ToTilePoint(pos);
+        Tilemap& map = mProj.maps[mapNum];
+
+        Ent& ent = map.ents[mEnt];
+        MapRect r = ent.Geometry();
+        if (!r.IsEmpty()) {
+            r.x = tp.x;
+            r.y = tp.y;
+            view->SetCursor(r);
+        }
+    }
+}
+
+void EntTool::Release(MapView* view, int mapNum, PixPoint const& pos, int b)
+{
+    if (mHandle == MOVE && mEnt != -1) {
+        TilePoint tp = mProj.ToTilePoint(pos);
+        Tilemap& map = mProj.maps[mapNum];
+
+        Ent ent = map.ents[mEnt];   // Copy ent.
+        ent.SetAttrInt("x", tp.x);
+        ent.SetAttrInt("y", tp.y);
+        EditEntCmd* cmd = new EditEntCmd(mEd, mapNum, ent, mEnt);
+        mEd.AddCmd(cmd);
+    }
+    view->HideCursor();
+    Reset();
+}
+
+
+void EntTool::Reset()
+{
+    mHandle = NONE;
+    mEnt = -1;
+}
+

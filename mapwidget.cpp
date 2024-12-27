@@ -277,7 +277,7 @@ void MapWidget::paintEvent(QPaintEvent *event)
             painter.drawRect(bound.adjusted(1,1,-1,-1));
             painter.drawRect(bound.adjusted(-1,-1,1,1));
 
-            auto label = QString::fromStdString(ent.Get("kind"));
+            auto label = QString::fromStdString(ent.GetAttr("kind"));
             painter.setPen(QColor(0,0,255,128));
             painter.drawText(bound.adjusted(2,2,0,0), Qt::AlignCenter, label);
             painter.setPen(QColor(255,255,255,128));

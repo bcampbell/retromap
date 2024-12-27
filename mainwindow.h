@@ -86,6 +86,7 @@ private:
        QAction* rectTool{nullptr};
        QAction* pickupTool{nullptr};
        QAction* floodFillTool{nullptr};
+       QAction* entTool{nullptr};
        QAction* useCustomBrush{nullptr};
        QAction* hFlipBrush{nullptr};
        QAction* vFlipBrush{nullptr};

@@ -284,8 +284,6 @@ bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end)
     return true;
 }
 
-
-
 // Ent implementation
 std::string Ent::ToString() const
 {
@@ -326,7 +324,7 @@ void Ent::FromString(std::string const& s)
     }
 }
 
-std::string Ent::Get(std::string const& name) const
+std::string Ent::GetAttr(std::string const& name) const
 {
     for (auto const& attr : attrs) {
         if (attr.name == name) {
@@ -337,23 +335,66 @@ std::string Ent::Get(std::string const& name) const
 }
 
 
-int Ent::GetAsInt(std::string const& name) const
+int Ent::GetAttrInt(std::string const& name) const
 {
-    auto s = Get(name);
+    auto s = GetAttr(name);
     int i = 0;
     std::from_chars(s.data(), s.data() + s.size(), i);
     return i;
 }
 
 
+void Ent::SetAttr(std::string const& name, std::string const& value)
+{
+    // Update existing?
+    for (auto& attr : attrs) {
+        if (attr.name == name) {
+            attr.value = value;
+            return;
+        }
+    }
+    // Add new.
+    attrs.push_back(EntAttr{name,value});
+}
+
+void Ent::SetAttrInt(std::string const& name, int value)
+{
+    SetAttr(name, std::format("{}", value));
+}
+
 
 MapRect Ent::Geometry() const
 {
     return MapRect(
-            GetAsInt("x"),
-            GetAsInt("y"),
-            GetAsInt("w"),
-            GetAsInt("h")
+            GetAttrInt("x"),
+            GetAttrInt("y"),
+            GetAttrInt("w"),
+            GetAttrInt("h")
             );
+}
+
+
+
+
+
+
+int PickEnt(Proj const& proj, int mapNum, PixPoint const& pos)
+{
+    int tw = proj.charset.tw;
+    int th = proj.charset.th;
+    Tilemap const & map = proj.maps[mapNum];
+    for (int i = 0; i < (int)map.ents.size(); ++i) {
+        Ent const& ent = map.ents[i];
+        MapRect mr = ent.Geometry();
+        if (mr.IsEmpty()) {
+            continue;
+        }
+
+        PixRect pr(mr.x * tw, mr.y * th, mr.w * tw, mr.h * th);
+        if (pr.Contains(pos)) {
+            return i;   // hit!
+        }
+    }
+    return -1;  // none.
 }
 
