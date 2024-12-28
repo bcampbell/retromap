@@ -9,6 +9,7 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QSignalBlocker>
 
 EntWidget::EntWidget(QWidget* parent, Editor& ed) :
     QWidget(parent),
@@ -73,6 +74,7 @@ void EntWidget::AddEnt()
 
 void EntWidget::SetMapNum(int mapNum)
 {
+    const QSignalBlocker blocker(mListWidget);
     mMapNum = mapNum;
 
     mListWidget->clear();
@@ -86,15 +88,12 @@ void EntWidget::SetMapNum(int mapNum)
     }
 }
 
-
-
-
-
 void EntWidget::ProjEntsInserted(int mapNum, int entNum, int count)
 {
     if (mapNum != mMapNum) {
         return; // Not our problem.
     }
+    const QSignalBlocker blocker(mListWidget);
     for (int i = 0; i < count; ++i) {
         Ent const& ent = mEd.GetEnt(mMapNum, entNum + i);
         QListWidgetItem* item = new QListWidgetItem();
@@ -109,6 +108,7 @@ void EntWidget::ProjEntsRemoved(int mapNum, int entNum, int count)
     if (mapNum != mMapNum) {
         return; // Not our problem.
     }
+    const QSignalBlocker blocker(mListWidget);
     for (int i = 0; i < count; ++i) {
         delete mListWidget->item(entNum);
     }
@@ -119,6 +119,7 @@ void EntWidget::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent c
     if (mapNum != mMapNum) {
         return; // Not our problem.
     }
+    const QSignalBlocker blocker(mListWidget);
     Ent const& ent = mEd.GetEnt(mapNum, entNum);
     QListWidgetItem* item = mListWidget->item(entNum);
     item->setText(QString::fromStdString(ent.ToString()));
@@ -126,7 +127,7 @@ void EntWidget::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent c
 
 void EntWidget::SetSelection(std::vector<int> const& sel)
 {
-    bool oldState = mListWidget->blockSignals(true);
+    const QSignalBlocker blocker(mListWidget);
     for (int i = 0; i < mListWidget->count(); ++i) {
         auto item = mListWidget->item(i);
         if (std::find(sel.begin(), sel.end(), i) == sel.end()) {
@@ -135,7 +136,6 @@ void EntWidget::SetSelection(std::vector<int> const& sel)
             item->setSelected(true);
         }
     }
-    mListWidget->blockSignals(oldState);
 }
 
 std::vector<int> EntWidget::Selection() {
