@@ -417,15 +417,6 @@ void MainWindow::createWidgets()
     // The main map editing area
     mMapWidget = new MapWidget(nullptr);
 
-    connect(mMapWidget, &MapWidget::cursorChanged, this, [&](MapRect const& cursor) {
-        // Show the cursor position on the status bar.
-        QString msg;
-        if(!cursor.IsEmpty()) {
-            msg = QString("%1,%2 (%3x%4)").arg(cursor.x).arg(cursor.y).arg(cursor.w).arg(cursor.h);
-        }
-        mCursorMsg->setText(msg);
-    });
-
     mCharsetWidget = new CharsetWidget(nullptr);
 
     mCharsetWidget->SetTiles(&mEd.proj.charset, &mEd.proj.palette);
@@ -489,6 +480,25 @@ void MainWindow::createWidgets()
 
 
     // Wire it all up!
+
+    connect(mMapWidget, &MapWidget::cursorChanged, this, [&](MapRect const& cursor) {
+        // Show the cursor position on the status bar.
+        QString msg;
+        if(!cursor.IsEmpty()) {
+            msg = QString("%1,%2 (%3x%4)").arg(cursor.x).arg(cursor.y).arg(cursor.w).arg(cursor.h);
+        }
+        mCursorMsg->setText(msg);
+    });
+
+    connect(mMapWidget, &MapWidget::entSelectionChanged, this, [&]() {
+        mEntWidget->SetSelection(mPresenter.SelectedEnts());
+    });
+
+    connect(mEntWidget, &EntWidget::selectionChanged, this, [&]() {
+       auto sel = mEntWidget->Selection();
+       mPresenter.SetSelectedEnts(sel);
+    });
+
 
     connect(mCharsetWidget, &CharsetWidget::leftChanged, this, [self=this](int tile) {
         self->mEd.leftPen.tile = tile;

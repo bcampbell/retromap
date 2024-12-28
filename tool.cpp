@@ -4,6 +4,7 @@
 #include "proj.h"
 #include "mapview.h"
 #include "editor.h"
+#include "mapeditor.h"
 
 #include <cassert>
 
@@ -305,6 +306,8 @@ void EntTool::Press(MapView* view, int mapNum, PixPoint const& pos, int b)
     }
 
     mEnt = e;
+    // select the ent, via the view.
+    view->SetSelectedEnts({mEnt});
     mHandle = MOVE;
     mAnchor = pos;
     // TODO:  store mapnum!

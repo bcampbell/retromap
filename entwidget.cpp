@@ -55,6 +55,9 @@ EntWidget::EntWidget(QWidget* parent, Editor& ed) :
             EditEntCmd* cmd = new EditEntCmd(mEd, mMapNum, newData, entNum);
             mEd.AddCmd(cmd);
     });
+    connect(mListWidget, &QListWidget::itemSelectionChanged, this, [&](){
+        emit selectionChanged();
+    });
 
 }
 
@@ -120,3 +123,28 @@ void EntWidget::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent c
     QListWidgetItem* item = mListWidget->item(entNum);
     item->setText(QString::fromStdString(ent.ToString()));
 }
+
+void EntWidget::SetSelection(std::vector<int> const& sel)
+{
+    bool oldState = mListWidget->blockSignals(true);
+    for (int i = 0; i < mListWidget->count(); ++i) {
+        auto item = mListWidget->item(i);
+        if (std::find(sel.begin(), sel.end(), i) == sel.end()) {
+            item->setSelected(false);
+        } else {
+            item->setSelected(true);
+        }
+    }
+    mListWidget->blockSignals(oldState);
+}
+
+std::vector<int> EntWidget::Selection() {
+
+    std::vector<int> sel;
+    auto l = mListWidget->selectedItems();
+    for (auto item : l) {
+        sel.push_back(mListWidget->row(item));
+    }
+    return sel;
+}
+

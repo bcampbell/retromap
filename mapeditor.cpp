@@ -158,3 +158,13 @@ void MapEditor::Release(MapView* view, PixPoint const& pt, int button)
     mEd.tool->Release(view, mCurMap, pt, button);
 }
 
+void MapEditor::SetSelectedEnts(std::vector<int> const& sel) {
+    mSelectedEnts = sel;
+    for (auto view : mViews) {
+        view->EntSelectionChanged();
+    }
+}
+
+bool MapEditor::IsEntSelected(int endIdx) const {
+    return (std::find(mSelectedEnts.begin(), mSelectedEnts.end(), endIdx) != mSelectedEnts.end());
+}

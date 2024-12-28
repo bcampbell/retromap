@@ -65,6 +65,9 @@ void MapWidget::HideCursor()
     SetCursor(MapRect());
 }
 
+
+// TODO: cursor state should be held by presenter.
+// This should be a CursorChanged notification.
 void MapWidget::SetCursor(MapRect const& cursor)
 {
     if (mCursor == cursor) {
@@ -103,6 +106,20 @@ void MapWidget::EntsModified()
 {
     // redraw all
     update();
+}
+
+void MapWidget::EntSelectionChanged()
+{
+    update();
+}
+
+
+void MapWidget::SetSelectedEnts(std::vector<int> newSelection)
+{
+    if (mPresenter) {
+        mPresenter->SetSelectedEnts(newSelection);
+    }
+    emit entSelectionChanged();
 }
 
 void MapWidget::UpdateBacking(MapRect const& dirty)
@@ -261,13 +278,16 @@ void MapWidget::paintEvent(QPaintEvent *event)
 
     // Draw ents
     {
-        for (auto const& ent : mTilemap->ents) {
+        for (int entIdx = 0; entIdx < (int)mTilemap->ents.size(); ++entIdx) {
+            Ent const& ent = mTilemap->ents[entIdx];
             MapRect entBound = ent.Geometry();
             if (entBound.IsEmpty()) {
                 continue;
             }
+            bool selected = (mPresenter && mPresenter->IsEntSelected(entIdx));
+
             QRect bound = FromMap(entBound);
-            QPen p(Qt::blue,1);
+            QPen p(QColor(0, 0, 255, selected ? 255: 128), 1);
             painter.setPen(p);
             painter.setBrush(Qt::NoBrush);
             painter.drawRect(bound);
@@ -277,7 +297,14 @@ void MapWidget::paintEvent(QPaintEvent *event)
             painter.drawRect(bound.adjusted(1,1,-1,-1));
             painter.drawRect(bound.adjusted(-1,-1,1,1));
 
+            // draw label
             auto label = QString::fromStdString(ent.GetAttr("kind"));
+            const std::vector<std::string> hidden = {"x", "y", "w", "h", "kind"};
+            for (auto const& attr : ent.attrs) {
+                if (std::find(hidden.begin(), hidden.end(), attr.name) == hidden.end()) {
+                    label += QString::fromStdString(std::format("\n{}={}", attr.name, attr.value));
+                }
+            }
             painter.setPen(QColor(0,0,255,128));
             painter.drawText(bound.adjusted(2,2,0,0), Qt::AlignCenter, label);
             painter.setPen(QColor(255,255,255,128));

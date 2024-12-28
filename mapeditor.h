@@ -1,6 +1,7 @@
 #include "editor.h"
 #include <set>
-
+#include <vector>
+#include <algorithm>
 
 class MapView;
 struct Proj;
@@ -24,6 +25,10 @@ public:
     void MapNavLinear(int delta);
     void MapNav2D(int dx, int dy);
 
+    void SetSelectedEnts(std::vector<int> const& sel);
+    std::vector<int> const& SelectedEnts() const {return mSelectedEnts;}
+    bool IsEntSelected(int endIdx) const;
+
     // Called by view
     void Press(MapView* view, PixPoint const& pt, int button);
     void Move(MapView* view, PixPoint const& pt, int button);
@@ -40,8 +45,10 @@ public:
     virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
 private:
     Editor& mEd;
+    // Hmm. Should presenter and view be 1:1?
     std::set<MapView*> mViews;
     Proj& mProj;
     int mCurMap{0};
+    std::vector<int> mSelectedEnts;
 };
 

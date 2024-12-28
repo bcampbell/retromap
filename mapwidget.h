@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cassert>
 
 #include <QtWidgets/QWidget>
 #include <QImage>
@@ -28,17 +29,23 @@ public:
 
     // MapView methods
     virtual void SetPresenter(MapEditor* presenter);
+    virtual MapEditor& Presenter()
+        { assert(mPresenter); return *mPresenter;}
     virtual void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
     virtual void MapModified(MapRect const& dirty);
     virtual void EntsModified();
     virtual void SetCursor(MapRect const& area);
     virtual void HideCursor();
+    virtual void EntSelectionChanged();
+    virtual void SetSelectedEnts(std::vector<int> newSelection);
 
     void ShowGrid(bool yesno);
     bool IsGridShown() const {return mShowGrid;}
 
 signals:
     void cursorChanged(MapRect const& cursor);
+    // Emitted when presenter ent selection is changed by mapwidget.
+    void entSelectionChanged();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
