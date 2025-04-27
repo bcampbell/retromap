@@ -5,7 +5,7 @@
 #include "tool.h"
 
 
-Editor::Editor()
+Model::Model()
 {
     leftPen = {1,1,0};
     rightPen = {32,0,0};
@@ -14,7 +14,7 @@ Editor::Editor()
 }
 
 
-Editor::~Editor()
+Model::~Model()
 {
     delete tool;
     tool = nullptr;
@@ -28,7 +28,7 @@ Editor::~Editor()
     }
 }
 
-void Editor::SetTool(int toolKind)
+void Model::SetTool(int toolKind)
 {
     Tool* newTool = nullptr;
     switch(toolKind) {
@@ -55,7 +55,7 @@ void Editor::SetTool(int toolKind)
 
 
 // Adds a command to the undo stack, and calls its Do() fn
-void Editor::AddCmd(Cmd* cmd)
+void Model::AddCmd(Cmd* cmd)
 {
     //const int maxundos = 128;
 
@@ -81,7 +81,7 @@ void Editor::AddCmd(Cmd* cmd)
 }
 
 
-void Editor::Undo()
+void Model::Undo()
 {
     if(undoStack.empty()) {
         return;
@@ -92,7 +92,7 @@ void Editor::Undo()
     redoStack.push_back(cmd);
 }
 
-void Editor::Redo()
+void Model::Redo()
 {
     if(redoStack.empty())
         return;

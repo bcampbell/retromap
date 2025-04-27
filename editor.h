@@ -9,10 +9,10 @@
 class Cmd;
 
 // Callback interface for things that want to know about changes.
-class EditListener
+class IModelListener
 {
 public:
-    virtual ~EditListener() = default;
+    virtual ~IModelListener() = default;
     virtual void EditorPenChanged() {};
     virtual void EditorToolChanged() {};
     virtual void EditorBrushChanged() {};
@@ -39,18 +39,17 @@ public:
 #define DRAWFLAG_ALL (DRAWFLAG_TILE|DRAWFLAG_INK|DRAWFLAG_PAPER)
 
 // Owns a Proj and holds all the editing state.
-// TODO: Should probably be called EditState or something...
-class Editor {
+class Model {
 public:
     // start with a default proj
-    Editor();
-    ~Editor();
+    Model ();
+    ~Model();
 
     Proj proj;
     bool modified{false};
     std::string mapFilename;
     std::string tilesetFilename;
-    std::set<EditListener*> listeners;
+    std::set<IModelListener*> listeners;
 
 	std::vector<Cmd*> undoStack;
 	std::vector<Cmd*> redoStack;

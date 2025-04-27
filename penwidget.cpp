@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 
-PenWidget::PenWidget(QWidget* parent, Editor& ed) :
+PenWidget::PenWidget(QWidget* parent, Model& ed) :
     QWidget(parent),
     mEd(ed)
 {

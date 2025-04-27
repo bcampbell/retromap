@@ -11,7 +11,7 @@
 #include <QVBoxLayout>
 #include <QSignalBlocker>
 
-EntWidget::EntWidget(QWidget* parent, Editor& ed) :
+EntWidget::EntWidget(QWidget* parent, Model& ed) :
     QWidget(parent),
     mEd(ed)
 {

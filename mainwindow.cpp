@@ -24,7 +24,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(QWidget *parent, Editor& ed)
+MainWindow::MainWindow(QWidget *parent, Model& ed)
     : QMainWindow(parent), mEd(ed), mPresenter(ed)
 {
     mEd.modified = false;
@@ -686,7 +686,7 @@ void MainWindow::importMaps()
 }
 
 
-// EditListener
+// ModelListener
 void MainWindow::EditorPenChanged()
 {
 }
@@ -729,25 +729,25 @@ void MainWindow::EditorToolChanged()
     }
 }
 
-// EditListener
+// ModelListener
 void MainWindow::ProjMapModified(int mapNum, MapRect const& dirty)
 {
 }
 
-// EditListener
+// ModelListener
 void MainWindow::ProjCharsetModified()
 {
     mCharsetWidget->SetTiles(&mEd.proj.charset, &mEd.proj.palette);
     RethinkTitle();
 }
 
-// EditListener
+// ModelListener
 void MainWindow::ProjMapsInserted(int first, int count)
 {
     RethinkTitle();
 }
 
-// EditListener
+// ModelListener
 void MainWindow::ProjMapsRemoved(int first, int count)
 {
     RethinkTitle();

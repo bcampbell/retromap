@@ -1,14 +1,14 @@
 #pragma once
 
-class MapEditor;
+class MapPresenter;
 
 #include "proj.h"
 
 // Base interface for View part of MVP.
-class MapView {
+class IView {
 public:
-    virtual void SetPresenter(MapEditor* presenter) = 0;
-    virtual MapEditor& Presenter() = 0;
+    virtual void SetPresenter(MapPresenter* presenter) = 0;
+    virtual MapPresenter& Presenter() = 0;
     virtual void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette) = 0;
     virtual void MapModified(MapRect const& dirty) = 0;
     virtual void EntsModified() = 0;
@@ -16,7 +16,7 @@ public:
     virtual void HideCursor() = 0;
     virtual void EntSelectionChanged() =0;
     virtual void SetSelectedEnts(std::vector<int> newSelection) = 0;
-    virtual ~MapView() = default;
+    virtual ~IView() = default;
 };
 
 

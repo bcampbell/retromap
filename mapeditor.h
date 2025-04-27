@@ -3,22 +3,22 @@
 #include <vector>
 #include <algorithm>
 
-class MapView;
+class IView;
 struct Proj;
 
-// MapEditor is Presenter part of MVP
+// MapPresenter is Presenter part of MVP
 // Core class - no GUI code here, that's all in the view.
-class MapEditor : public EditListener {
+class MapPresenter : public IModelListener {
 
 public:
-    MapEditor() = delete;
-	MapEditor(Editor& ed);
-    ~MapEditor();
+    MapPresenter() = delete;
+	MapPresenter(Model& ed);
+    ~MapPresenter();
 
 
     // set which map we're looking at
-    void AddView(MapView* view);
-    void RemoveView(MapView* view);
+    void AddView(IView* view);
+    void RemoveView(IView* view);
     void SetCurrentMap(int mapNum);
     int CurrentMap() {return mCurMap;}
 
@@ -30,11 +30,11 @@ public:
     bool IsEntSelected(int endIdx) const;
 
     // Called by view
-    void Press(MapView* view, PixPoint const& pt, int button);
-    void Move(MapView* view, PixPoint const& pt, int button);
-    void Release(MapView* view, PixPoint const& pt, int button);
+    void Press(IView* view, PixPoint const& pt, int button);
+    void Move(IView* view, PixPoint const& pt, int button);
+    void Release(IView* view, PixPoint const& pt, int button);
 
-    // EditListener
+    // IModelListener
     virtual void ProjCharsetModified();
     virtual void ProjMapModified(int mapNum, MapRect const& dirty);
     virtual void ProjNuke();
@@ -44,9 +44,9 @@ public:
     virtual void ProjEntsRemoved(int mapNum, int entNum, int count);
     virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
 private:
-    Editor& mEd;
+    Model& mEd;
     // Hmm. Should presenter and view be 1:1?
-    std::set<MapView*> mViews;
+    std::set<IView*> mViews;
     Proj& mProj;
     int mCurMap{0};
     std::vector<int> mSelectedEnts;

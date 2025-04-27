@@ -17,15 +17,15 @@ class QLabel;
 
 
 // Our main app window.
-class MainWindow : public QMainWindow, EditListener
+class MainWindow : public QMainWindow, IModelListener
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent, Editor& ed);
+    MainWindow(QWidget *parent, Model& ed);
     virtual ~MainWindow();
 
-    // EditListener
+    // IModelListener
     virtual void EditorPenChanged();
     virtual void EditorBrushChanged();
     virtual void EditorToolChanged();
@@ -54,10 +54,10 @@ private:
     void MapNumChanged();
 
     // The editor state
-    Editor& mEd;
+    Model& mEd;
 
     MapWidget* mMapWidget;
-    MapEditor  mPresenter;
+    MapPresenter  mPresenter;   // TODO: embed in MapWidget.
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;

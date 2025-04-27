@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
     QApplication app (argc, argv);
 
-    std::vector<Editor*> editors;
+    std::vector<Model*> editors;
 
     auto args = app.arguments();
     for (int i = 1; i < args.size(); ++i) {
@@ -17,14 +17,14 @@ int main(int argc, char **argv)
             printf("ERROR: failed to load %s\n", args.at(i).toStdString().c_str());
             continue;
         }
-        Editor* ed = new Editor();
+        Model* ed = new Model();
         ed->proj = proj;
         ed->mapFilename = args.at(i).toStdString();
         editors.push_back(ed);
     }
     if(editors.empty()) {
         // blank
-        Editor* ed = new Editor();
+        Model* ed = new Model();
         editors.push_back(ed);
     }
 

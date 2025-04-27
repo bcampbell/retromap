@@ -2,19 +2,19 @@
 
 #include "proj.h"
 
-class Editor;
+class Model;
 
 class Cmd
 {
 public:
     enum CmdState {NOT_DONE, DONE};
-    Cmd(Editor& ed, CmdState initial = NOT_DONE) : mEd(ed), mState(initial) {}
+    Cmd(Model& ed, CmdState initial = NOT_DONE) : mEd(ed), mState(initial) {}
     virtual ~Cmd() {}
     virtual void Do() = 0;
     virtual void Undo() = 0;
     CmdState State() const {return mState;}
 protected:
-    Editor& mEd;
+    Model& mEd;
     CmdState mState;
 };
 
@@ -22,7 +22,7 @@ class MapDrawCmd : public Cmd
 {
 public:
     MapDrawCmd() = delete;
-    MapDrawCmd(Editor& ed, int mapNum);
+    MapDrawCmd(Model& ed, int mapNum);
 
     // Add changes to cmd, applied immediately.
     void Plonk(TilePoint const& pos, Cell const& cell, int drawFlags);
@@ -48,7 +48,7 @@ class InsertMapsCmd : public Cmd
 {
 public:
     InsertMapsCmd() = delete;
-    InsertMapsCmd(Editor& ed, std::vector<Tilemap> const& newMaps, int pos) :
+    InsertMapsCmd(Model& ed, std::vector<Tilemap> const& newMaps, int pos) :
         Cmd(ed), mNewMaps(newMaps), mPos(pos) {}
     virtual void Do();
     virtual void Undo();
@@ -61,7 +61,7 @@ class DeleteMapsCmd : public Cmd
 {
 public:
     DeleteMapsCmd() = delete;
-    DeleteMapsCmd(Editor& ed, int beginMap, int endMap);
+    DeleteMapsCmd(Model& ed, int beginMap, int endMap);
     virtual void Do();
     virtual void Undo();
 private:
@@ -74,7 +74,7 @@ class ReplaceCharsetCmd : public Cmd
 {
 public:
     ReplaceCharsetCmd() = delete;
-    ReplaceCharsetCmd(Editor& ed, Charset const& newTiles) :
+    ReplaceCharsetCmd(Model& ed, Charset const& newTiles) :
         Cmd(ed), mTiles(newTiles) {}
     virtual void Do();
     virtual void Undo();
@@ -87,7 +87,7 @@ class ResizeMapCmd : public Cmd
 {
 public:
     ResizeMapCmd() = delete;
-    ResizeMapCmd(Editor& ed, int mapNum, MapRect newDimensions);
+    ResizeMapCmd(Model& ed, int mapNum, MapRect newDimensions);
     virtual void Do();
     virtual void Undo();
 private:
@@ -100,7 +100,7 @@ class InsertEntsCmd : public Cmd
 {
 public:
     InsertEntsCmd() = delete;
-    InsertEntsCmd(Editor& ed, int mapNum, std::vector<Ent> const& newEnts, int pos) :
+    InsertEntsCmd(Model& ed, int mapNum, std::vector<Ent> const& newEnts, int pos) :
         Cmd(ed), mMapNum(mapNum), mPos(pos), mNewEnts(newEnts) {}
     virtual void Do();
     virtual void Undo();
@@ -114,7 +114,7 @@ class DeleteEntsCmd : public Cmd
 {
 public:
     DeleteEntsCmd() = delete;
-    DeleteEntsCmd(Editor& ed, int mapNum, int pos, int count) :
+    DeleteEntsCmd(Model& ed, int mapNum, int pos, int count) :
         Cmd(ed), mMapNum(mapNum), mPos(pos), mCount(count) {}
     virtual void Do();
     virtual void Undo();
@@ -130,7 +130,7 @@ class EditEntCmd : public Cmd
 {
 public:
     EditEntCmd() = delete;
-    EditEntCmd(Editor& ed, int mapNum, Ent const& newData, int entNum) :
+    EditEntCmd(Model& ed, int mapNum, Ent const& newData, int entNum) :
         Cmd(ed), mMapNum(mapNum), mEnt(newData), mEntNum(entNum) {}
     virtual void Do();
     virtual void Undo();

@@ -6,24 +6,25 @@
 #include <QImage>
 #include "editor.h"
 
-class Editor;
+class Model;
 
-class PenWidget : public QWidget, EditListener
+// TODO: not IModelListener!
+class PenWidget : public QWidget, IModelListener
 {
     Q_OBJECT
 
 public:
     PenWidget() = delete;
-	PenWidget(QWidget* parent, Editor& ed);
+	PenWidget(QWidget* parent, Model& ed);
     virtual ~PenWidget();
 
-    // EditListener...
+    // IModelListener... (TODO: nope!)
     void EditorPenChanged() {update();}
 protected:
     void paintEvent(QPaintEvent *event);
 //    void resizeEvent(QResizeEvent *event);
 private:
-    Editor& mEd;
+    Model& mEd;
     int mZoom{4};
 };
 

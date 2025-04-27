@@ -10,7 +10,7 @@
 #include "mapview.h"
 
 class Tool;
-class MapEditor;
+class MapPresenter;
 
 // Implements the View part of MVP.
 // Provides the GUI part.
@@ -19,7 +19,7 @@ class MapEditor;
 // down to the Presenter layer.
 // The Presenter layer calls back to the view when the map changes, or to
 // update cursors.
-class MapWidget : public QWidget, public MapView {
+class MapWidget : public QWidget, public IView {
     Q_OBJECT
 
 public:
@@ -27,9 +27,9 @@ public:
 	MapWidget(QWidget* parent);
     virtual ~MapWidget();
 
-    // MapView methods
-    virtual void SetPresenter(MapEditor* presenter);
-    virtual MapEditor& Presenter()
+    // IView methods
+    virtual void SetPresenter(MapPresenter* presenter);
+    virtual MapPresenter& Presenter()
         { assert(mPresenter); return *mPresenter;}
     virtual void SetMap(Tilemap *tilemap, Charset *charset, Palette *palette);
     virtual void MapModified(MapRect const& dirty);
@@ -56,7 +56,7 @@ protected:
     QSize sizeHint() const override;
 
 private:
-    MapEditor* mPresenter{nullptr};
+    MapPresenter* mPresenter{nullptr};
     Tilemap* mTilemap{nullptr};
     Charset* mCharset{nullptr};
     Palette* mPalette{nullptr};

@@ -3,7 +3,7 @@
 #include <cassert>
 #include <algorithm>
 
-MapDrawCmd::MapDrawCmd(Editor& ed, int mapNum) :
+MapDrawCmd::MapDrawCmd(Model& ed, int mapNum) :
     Cmd(ed, DONE),
     mMapNum(mapNum)
 {
@@ -101,7 +101,7 @@ void InsertMapsCmd::Undo()
 //
 // DeleteMapsCmd
 //
-DeleteMapsCmd::DeleteMapsCmd(Editor& ed, int beginMap, int endMap) :
+DeleteMapsCmd::DeleteMapsCmd(Model& ed, int beginMap, int endMap) :
     Cmd(ed), mBeginMap(beginMap), mEndMap(endMap)
 {
     int nMaps = (int)mEd.proj.maps.size();
@@ -170,7 +170,7 @@ void ReplaceCharsetCmd::Undo()
 //
 // ResizeMapCmd
 //
-ResizeMapCmd::ResizeMapCmd(Editor& ed, int mapNum, MapRect r) :
+ResizeMapCmd::ResizeMapCmd(Model& ed, int mapNum, MapRect r) :
     Cmd(ed), mMapNum(mapNum)
 {
     assert(mapNum >=0 && mapNum < (int)ed.proj.maps.size());

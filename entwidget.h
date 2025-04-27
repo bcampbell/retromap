@@ -10,20 +10,22 @@
 
 class QListWidget;
 
-class EntWidget : public QWidget, EditListener
+// TODO: SHOULDN'T DERIVE FROM IModelListener!
+// Should be IView? IEntView?
+class EntWidget : public QWidget, IModelListener
 {
     Q_OBJECT
 
 public:
     EntWidget() = delete;
-	EntWidget(QWidget* parent, Editor& ed);
+	EntWidget(QWidget* parent, Model& ed);
     virtual ~EntWidget();
     void SetMapNum(int mapNum);
 
     void SetSelection(std::vector<int> const& sel);
     std::vector<int> Selection();
 
-    // EditListener...
+    // IModelListener... (TODO - kill!)
     void ProjEntsInserted(int mapNum, int entNum, int count);
     void ProjEntsRemoved(int mapNum, int entNum, int count);
     void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
@@ -33,7 +35,7 @@ protected:
     void AddEnt();
     void Rebuild();
 private:
-    Editor& mEd;
+    Model& mEd;
     QListWidget* mListWidget;
     int mMapNum{0};
 };

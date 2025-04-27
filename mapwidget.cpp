@@ -21,7 +21,7 @@ MapWidget::~MapWidget()
 {
 }
 
-void MapWidget::SetPresenter(MapEditor* presenter)
+void MapWidget::SetPresenter(MapPresenter* presenter)
 {
     mPresenter = presenter;
 }

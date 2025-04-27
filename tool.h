@@ -4,9 +4,9 @@ struct PixPoint;
 struct TilePoint;
 struct Cell;
 struct Proj;
-class MapView;
+class IView;
 class MapDrawCmd;
-class Editor;
+class Model;
 
 #define TOOL_DRAW 0
 #define TOOL_PICKUP 1
@@ -21,7 +21,7 @@ class Tool
 public:
 
     Tool() = delete;
-    Tool(Editor& ed);
+    Tool(Model& ed);
     virtual ~Tool();
 
     enum Button {
@@ -31,14 +31,14 @@ public:
 
     virtual int Kind() const = 0;
     // TODO: could get mapNum from view?
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b) {}
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b) {}
-    virtual void Release(MapView* view,int mapNum, PixPoint const& pos, int b) {}
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Release(IView* view,int mapNum, PixPoint const& pos, int b) {}
 
     // Stop any in-progress operation and go back to initial state.
     virtual void Reset() {}
 protected:
-    Editor& mEd;
+    Model& mEd;
     Proj& mProj;
 };
 
@@ -48,13 +48,13 @@ class DrawTool : public Tool
 {
 public:
     DrawTool() = delete;
-    DrawTool(Editor& ed) : Tool(ed) {}
+    DrawTool(Model& ed) : Tool(ed) {}
     virtual ~DrawTool() {}
 
     virtual int Kind() const {return TOOL_DRAW;}
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset() {} //TODO!
 private:
     TilePoint mPrevPos;
@@ -67,13 +67,13 @@ class PickupTool : public Tool
 {
 public:
     PickupTool() = delete;
-    PickupTool(Editor& ed) : Tool(ed) {}
+    PickupTool(Model& ed) : Tool(ed) {}
     virtual ~PickupTool() {}
 
     virtual int Kind() const {return TOOL_PICKUP;}
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     int mLatch{0};
@@ -86,13 +86,13 @@ class RectTool : public Tool
 {
 public:
     RectTool() = delete;
-    RectTool(Editor& ed) : Tool(ed) {}
+    RectTool(Model& ed) : Tool(ed) {}
     virtual ~RectTool() {}
 
     virtual int Kind() const {return TOOL_RECT;}
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     int mLatch{0};
@@ -104,13 +104,13 @@ class FloodFillTool : public Tool
 {
 public:
     FloodFillTool() = delete;
-    FloodFillTool(Editor& ed) : Tool(ed) {}
+    FloodFillTool(Model& ed) : Tool(ed) {}
     virtual ~FloodFillTool() {}
 
     virtual int Kind() const {return TOOL_FLOODFILL;}
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 };
 
@@ -120,13 +120,13 @@ class EntTool : public Tool
 {
 public:
     EntTool() = delete;
-    EntTool(Editor& ed) : Tool(ed) {}
+    EntTool(Model& ed) : Tool(ed) {}
     virtual ~EntTool() {}
 
     virtual int Kind() const {return TOOL_ENT;}
-    virtual void Press(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(MapView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(MapView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     enum Handle {NONE, MOVE, TOPLEFT, TOP, TOPRIGHT, RIGHT, BOTTOMRIGHT, BOTTOM, BOTTOMLEFT, LEFT};
