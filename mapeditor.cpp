@@ -54,7 +54,7 @@ void MapEditor::MapNavLinear(int delta)
 
 void MapEditor::MapNav2D(int dx, int dy)
 {
-    int w = 5;  // TODO: some setting, somewhere...
+    int w = 7;  // TODO: some setting, somewhere...
     int h = (int)mProj.maps.size() / w;
     int x = (mCurMap % w) + dx;
     int y = (mCurMap / w) + dy;
