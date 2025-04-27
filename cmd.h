@@ -96,6 +96,20 @@ private:
     Tilemap mOther;
 };
 
+// Exchange two maps.
+class ExchangeMapsCmd : public Cmd
+{
+public:
+    ExchangeMapsCmd() = delete;
+    ExchangeMapsCmd(Model& ed, int map1, int map2);
+    virtual void Do();
+    virtual void Undo();
+private:
+    void Swap();
+    int mMap1;
+    int mMap2;
+};
+
 class InsertEntsCmd : public Cmd
 {
 public:

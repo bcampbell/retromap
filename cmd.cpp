@@ -198,6 +198,38 @@ void ResizeMapCmd::Undo()
     mState = NOT_DONE;
 }
 
+
+//
+// ExchangeMapsCmd
+//
+ExchangeMapsCmd::ExchangeMapsCmd(Model& ed, int map1, int map2) :
+    Cmd(ed), mMap1(map1), mMap2(map2)
+{
+    assert(map1 >=0 && map1 < (int)ed.proj.maps.size());
+    assert(map2 >=0 && map2 < (int)ed.proj.maps.size());
+}
+
+void ExchangeMapsCmd::Swap()
+{
+    std::swap(mEd.proj.maps[mMap1], mEd.proj.maps[mMap2]);
+    for (auto l : mEd.listeners) {
+        l->ProjNuke();
+    }
+    mEd.modified = true;
+}
+
+void ExchangeMapsCmd::Do()
+{
+    Swap();
+    mState = DONE;
+}
+
+void ExchangeMapsCmd::Undo()
+{
+    Swap();
+    mState = NOT_DONE;
+}
+
 //
 // InsertEntsCmd
 //

@@ -5,6 +5,7 @@
 #include "helpers.h"
 #include "MapWidget.h"
 #include "MapSizeDialog.h"
+#include "MapExchangeDialog.h"
 #include "PaletteWidget.h"
 #include "PenWidget.h"
 
@@ -153,6 +154,12 @@ void MainWindow::createActions()
             }
         });
         mActions.deleteMap = a;
+    }
+    // Exchange map
+    {
+        QAction* a= new QAction(tr("Exchange map..."), this);
+        connect(a, &QAction::triggered, this, &MainWindow::exchangeMap);
+        mActions.exchangeMap = a;
     }
     // Resize current map
     {
@@ -390,6 +397,7 @@ void MainWindow::createMenus()
         m->addAction(mActions.addMap);
         m->addAction(mActions.deleteMap);
         m->addAction(mActions.resizeMap);
+        m->addAction(mActions.exchangeMap);
         m->addSeparator();
         m->addAction(mActions.showGrid);
         menuBar()->addMenu(m);
@@ -664,6 +672,19 @@ void MainWindow::resizeMap()
     auto* cmd = new ResizeMapCmd(mEd, mapNum, newSize);
     mEd.AddCmd(cmd);
 }
+
+
+void MainWindow::exchangeMap()
+{
+    int mapNum = mPresenter.CurrentMap();
+    MapExchangeDialog dlg(this, mapNum, mapNum);
+    if (dlg.exec() != QDialog::Accepted) {
+        return;
+    }
+   auto* cmd = new ExchangeMapsCmd(mEd, dlg.ResultMap1(), dlg.ResultMap2());
+   mEd.AddCmd(cmd);
+}
+
 
 void MainWindow::importMaps()
 {
