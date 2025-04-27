@@ -5,8 +5,8 @@
 
 #include <QtWidgets/QWidget>
 #include <QImage>
-#include "editor.h"
 
+#include "model.h"
 
 class QListWidget;
 

@@ -1,7 +1,8 @@
-#include "editor.h"
 #include <set>
 #include <vector>
 #include <algorithm>
+
+#include "model.h"
 
 class IView;
 struct Proj;

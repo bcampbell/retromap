@@ -1,4 +1,4 @@
-#include "charsetwidget.h"
+#include "CharsetWidget.h"
 #include "helpers.h"
 
 #include <QPainter>

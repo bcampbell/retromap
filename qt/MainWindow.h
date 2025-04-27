@@ -4,9 +4,9 @@
 #include <QCloseEvent>
 
 #include "proj.h"
-#include "editor.h"
-#include "mapeditor.h"
+#include "mappresenter.h"
 
+class Model;
 class CharsetWidget;
 class EntWidget;
 class MapWidget;

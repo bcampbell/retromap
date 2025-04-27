@@ -1,14 +1,12 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 
-#include "charsetwidget.h"
-#include "cmd.h"
-#include "draw.h"
-#include "entwidget.h"
+#include "CharsetWidget.h"
+#include "EntWidget.h"
 #include "helpers.h"
-#include "mapwidget.h"
-#include "mapsizedialog.h"
-#include "palettewidget.h"
-#include "penwidget.h"
+#include "MapWidget.h"
+#include "MapSizeDialog.h"
+#include "PaletteWidget.h"
+#include "PenWidget.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -23,6 +21,10 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QVBoxLayout>
+
+#include "cmd.h"
+#include "draw.h"
+#include "model.h"
 
 MainWindow::MainWindow(QWidget *parent, Model& ed)
     : QMainWindow(parent), mEd(ed), mPresenter(ed)

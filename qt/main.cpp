@@ -1,8 +1,9 @@
 #include <QApplication>
 #include <QPushButton>
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "helpers.h"
-#include "editor.h"
+
+#include "model.h"
 
 int main(int argc, char **argv)
 {

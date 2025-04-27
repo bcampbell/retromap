@@ -212,7 +212,7 @@ struct Proj
     }
 };
 
-
+void DefaultProj(Proj* proj);
 void WriteProj(Proj const& proj, std::vector<uint8_t>& out);
 bool ReadProj(Proj& proj, uint8_t const* p, uint8_t const* end);
 

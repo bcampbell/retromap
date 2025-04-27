@@ -7,7 +7,7 @@
 #include <QImage>
 
 #include "proj.h"
-#include "mapview.h"
+#include "view.h"
 
 class Tool;
 class MapPresenter;

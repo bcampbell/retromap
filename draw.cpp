@@ -1,5 +1,5 @@
 #include "draw.h"
-#include "editor.h"
+#include "model.h"
 
 #include <algorithm>
 

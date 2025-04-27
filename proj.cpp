@@ -398,3 +398,57 @@ int PickEnt(Proj const& proj, int mapNum, PixPoint const& pos)
     return -1;  // none.
 }
 
+void DefaultProj(Proj* proj)
+{
+    // https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics#C-64
+    static const uint8_t c64palette[3*16] = {
+        0,    0,    0,   // Black
+        255,  255,  255, // White
+        136,   57,   50, // Red
+        103,  182,  189, // Cyan
+        139,   63,  150, // Purple
+         85,  160,   73, // Green
+         64,   49,  141, // Blue
+        191,  206,  114, // Yellow
+        139,   84,   41, // Orange
+         87,   66,    0, // Brown
+        184,  105,   98, // Light Red
+         80,   80,   80, // Dark Grey
+        120,  120,  120, // Grey
+        148,  224,  137, // Light Green
+        120,  105,  196, // Light Blue
+        159,  159,  159, // Light Grey
+    };
+
+    Tilemap map;
+    map.w = 40;
+    map.h = 25;
+    map.cells.resize(map.w * map.h);
+    proj->maps.push_back(map);
+
+    // default charset
+    {
+        Charset& t = proj->charset;
+        t.tw = 8;
+        t.th = 8;
+        t.ntiles = 2;
+        t.images.resize(t.tw * t.th * t.ntiles);
+        uint8_t* dest = t.Raw(0);
+        for (int i = 0; i < 8 * 8; ++i) {
+            *dest++ = 0;
+        }
+        for (int i = 0; i < 8 * 8; ++i) {
+            *dest++ = 1;
+        }
+    }
+    Palette& pal = proj->palette;
+    pal.ncolours = 16;
+    pal.colours.resize(pal.ncolours * 4);
+    for (int i = 0; i < pal.ncolours; ++i) {
+        pal.colours[i * 4 + 0] = c64palette[i * 3 + 0];
+        pal.colours[i * 4 + 1] = c64palette[i * 3 + 1];
+        pal.colours[i * 4 + 2] = c64palette[i * 3 + 2];
+        pal.colours[i * 4 + 3] = 255;
+    }
+}
+

@@ -1,15 +1,15 @@
-#include "entwidget.h"
+#include "EntWidget.h"
 //#include "helpers.h"
-#include "editor.h"
-#include "proj.h"
-#include "cmd.h"
-
 //#include <QPainter>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSignalBlocker>
+
+#include "model.h"
+#include "proj.h"
+#include "cmd.h"
 
 EntWidget::EntWidget(QWidget* parent, Model& ed) :
     QWidget(parent),

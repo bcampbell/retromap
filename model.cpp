@@ -1,7 +1,7 @@
 #include "cmd.h"
-#include "editor.h"
+#include "model.h"
 #include "proj.h"
-#include "helpers.h"
+//#include "helpers.h"
 #include "tool.h"
 
 
@@ -9,7 +9,7 @@ Model::Model()
 {
     leftPen = {1,1,0};
     rightPen = {32,0,0};
-    InitProj(&proj);
+    DefaultProj(&proj);
     tool = new DrawTool(*this);
 }
 

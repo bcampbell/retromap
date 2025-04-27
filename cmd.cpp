@@ -1,5 +1,5 @@
 #include "cmd.h"
-#include "editor.h"
+#include "model.h"
 #include <cassert>
 #include <algorithm>
 

@@ -6,38 +6,41 @@ qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'])
 #incdirs = include_directories('src')
 
 my_headers = [
-  'charsetwidget.h',
   'cmd.h',
   'draw.h',
-  'editor.h',
-  'entwidget.h',
-  'helpers.h',
-  'mainwindow.h',
-  'mapeditor.h',
-  'mapsizedialog.h',
-  'mapview.h',
-  'mapwidget.h',
-  'palettewidget.h',
-  'penwidget.h',
+  'model.h',
+  'mappresenter.h',
+  'view.h',
   'proj.h',
-  'tool.h']
+  'tool.h',
+
+  'qt/CharsetWidget.h',
+  'qt/EntWidget.h',
+  'qt/helpers.h',
+  'qt/MainWindow.h',
+  'qt/MapSizeDialog.h',
+  'qt/MapWidget.h',
+  'qt/PaletteWidget.h',
+  'qt/PenWidget.h']
+  
 
 my_sources = [
-  'charsetwidget.cpp',
   'cmd.cpp',
   'draw.cpp',
-  'editor.cpp',
-  'entwidget.cpp',
-  'helpers.cpp',
-  'main.cpp',
-  'mainwindow.cpp',
-  'mapeditor.cpp',
-  'mapsizedialog.cpp',
-  'mapwidget.cpp',
-  'palettewidget.cpp',
-  'penwidget.cpp',
+  'model.cpp',
+  'mappresenter.cpp',
   'proj.cpp',
-  'tool.cpp']
+  'tool.cpp',
+
+  'qt/main.cpp',
+  'qt/helpers.cpp',
+  'qt/CharsetWidget.cpp',
+  'qt/EntWidget.cpp',
+  'qt/MainWindow.cpp',
+  'qt/MapSizeDialog.cpp',
+  'qt/MapWidget.cpp',
+  'qt/PaletteWidget.cpp',
+  'qt/PenWidget.cpp']
 
 #qt_resources = ['resources.qrc']
 

@@ -93,7 +93,7 @@ bool ImportCharset(QString const& filename, Charset& charset, int tilew, int til
 }
 
 
-
+#if 0
 void InitProj(Proj* proj)
 {
     // https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics#C-64
@@ -148,7 +148,7 @@ void InitProj(Proj* proj)
         pal.colours[i * 4 + 3] = 255;
     }
 }
-
+#endif
 
 // Safely write map out to a file.
 // Tiles first, then colours. No metadata.

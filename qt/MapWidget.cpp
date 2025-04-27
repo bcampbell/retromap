@@ -1,6 +1,7 @@
-#include "mapwidget.h"
-#include "mapeditor.h"
+#include "MapWidget.h"
 #include "helpers.h"
+
+#include "mappresenter.h"
 #include "tool.h"
 
 //#include <cassert>

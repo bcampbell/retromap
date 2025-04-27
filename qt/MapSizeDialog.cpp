@@ -1,6 +1,6 @@
 #include <QtWidgets/QtWidgets>
 
-#include "mapsizedialog.h"
+#include "MapSizeDialog.h"
 
 MapSizeDialog::MapSizeDialog(QWidget *parent, int w, int h)
     : QDialog(parent)

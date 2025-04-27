@@ -1,6 +1,7 @@
-#include "penwidget.h"
+#include "PenWidget.h"
 #include "helpers.h"
-#include "editor.h"
+
+#include "model.h"
 #include "proj.h"
 
 #include <QPainter>

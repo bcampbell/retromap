@@ -2,9 +2,9 @@
 #include "draw.h"
 #include "tool.h"
 #include "proj.h"
-#include "mapview.h"
-#include "editor.h"
-#include "mapeditor.h"
+#include "view.h"
+#include "model.h"
+#include "mappresenter.h"
 
 #include <cassert>
 

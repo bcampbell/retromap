@@ -1,6 +1,7 @@
-#include "mapeditor.h"
-#include "mapwidget.h"
+#include "mappresenter.h"
+#include "view.h"
 #include "tool.h"
+#include "model.h"
 
 MapPresenter::MapPresenter(Model& ed) : mEd(ed), mProj(ed.proj)
 {

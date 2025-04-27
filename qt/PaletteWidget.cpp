@@ -1,4 +1,5 @@
-#include "palettewidget.h"
+#include "PaletteWidget.h"
+
 #include "proj.h"
 
 #include <QPainter>
