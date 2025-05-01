@@ -12,6 +12,7 @@ class EntWidget;
 class MapWidget;
 class PaletteWidget;
 class PenWidget;
+class WorldWidget;
 class QAction;
 class QLabel;
 
@@ -62,6 +63,7 @@ private:
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;
+    WorldWidget* mWorldWidget;
     EntWidget* mEntWidget;
     QLabel* mCursorMsg;
     struct {

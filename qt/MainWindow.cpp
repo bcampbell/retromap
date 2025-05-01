@@ -8,6 +8,7 @@
 #include "MapExchangeDialog.h"
 #include "PaletteWidget.h"
 #include "PenWidget.h"
+#include "WorldWidget.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -440,6 +441,7 @@ void MainWindow::createWidgets()
     mPaletteWidget->setLeftColour(mEd.leftPen.ink);
     mPaletteWidget->setRightColour(mEd.rightPen.ink);
 
+    mWorldWidget = new WorldWidget(this, mEd);
 
     // Set up Ent widget
     mEntWidget = new EntWidget(this, mEd);
@@ -483,6 +485,7 @@ void MainWindow::createWidgets()
         scroll->setWidget(mCharsetWidget);
         h->addWidget(scroll, Qt::AlignLeading);
     }
+    h->addWidget(mWorldWidget, Qt::AlignLeading);
     h->addWidget(mEntWidget, Qt::AlignLeading);
 
     top->addLayout(h);

@@ -22,7 +22,8 @@ my_headers = [
   'qt/MapSizeDialog.h',
   'qt/MapWidget.h',
   'qt/PaletteWidget.h',
-  'qt/PenWidget.h']
+  'qt/PenWidget.h',
+  'qt/WorldWidget.h']
   
 
 my_sources = [
@@ -42,7 +43,8 @@ my_sources = [
   'qt/MapSizeDialog.cpp',
   'qt/MapWidget.cpp',
   'qt/PaletteWidget.cpp',
-  'qt/PenWidget.cpp']
+  'qt/PenWidget.cpp',
+  'qt/WorldWidget.cpp']
 
 #qt_resources = ['resources.qrc']
 
