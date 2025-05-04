@@ -3,8 +3,7 @@
 #include <QMainWindow>
 #include <QCloseEvent>
 
-#include "proj.h"
-#include "mappresenter.h"
+#include "model.h"
 
 class Model;
 class CharsetWidget;

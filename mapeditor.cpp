@@ -1,26 +1,25 @@
-#include "mappresenter.h"
-#include "view.h"
+#include "mapeditor.h"
 #include "tool.h"
 #include "model.h"
 
-MapPresenter::MapPresenter(Model& model, IView& view) : mEd(model), mView(view), mProj(model.proj), mCurMap(0)
+MapEditor::MapEditor(Model& model) : mModel(model), mProj(model.proj), mCurMap(0)
 {
     model.listeners.insert(this);
 }
 
-MapPresenter::~MapPresenter()
+MapEditor::~MapEditor()
 {
-    mEd.listeners.erase(this);
+    mModel.listeners.erase(this);
 }
 
-void MapPresenter::SetCurrentMap(int mapNum)
+void MapEditor::SetCurrentMap(int mapNum)
 {
     assert(mapNum >= 0 && mapNum < (int)mProj.maps.size());
     mCurMap = mapNum;
-    mView.CurMapChanged();
+    CurMapChanged();
 }
 
-void MapPresenter::MapNavLinear(int delta)
+void MapEditor::MapNavLinear(int delta)
 {
     int numMaps = (int)mProj.maps.size();
     int n = mCurMap + delta;
@@ -33,7 +32,7 @@ void MapPresenter::MapNavLinear(int delta)
     SetCurrentMap(n);
 }
 
-void MapPresenter::MapNav2D(int dx, int dy)
+void MapEditor::MapNav2D(int dx, int dy)
 {
     int w = 7;  // TODO: some setting, somewhere...
     int h = (int)mProj.maps.size() / w;
@@ -50,14 +49,14 @@ void MapPresenter::MapNav2D(int dx, int dy)
 }
 
 // ModelListenerListener
-void MapPresenter::ProjMapModified(int mapNum, MapRect const& dirty)
+void MapEditor::ProjMapModified(int mapNum, MapRect const& dirty)
 {
     if (mapNum == mCurMap) {
-        mView.MapModified(dirty);
+        MapModified(dirty);
     }
 }
 
-void MapPresenter::ProjNuke()
+void MapEditor::ProjNuke()
 {
     int mapNum = mCurMap;
     if (mapNum >= (int)mProj.maps.size()) {
@@ -68,13 +67,13 @@ void MapPresenter::ProjNuke()
 }
 
 
-void MapPresenter::ProjMapsInserted(int first, int count)
+void MapEditor::ProjMapsInserted(int first, int count)
 {
     int n = mCurMap >= first ? mCurMap : mCurMap + count;
     SetCurrentMap(n);
 }
 
-void MapPresenter::ProjMapsRemoved(int first, int count)
+void MapEditor::ProjMapsRemoved(int first, int count)
 {
     int n = mCurMap;
    
@@ -88,54 +87,54 @@ void MapPresenter::ProjMapsRemoved(int first, int count)
     SetCurrentMap(n);
 }
 
-void MapPresenter::ProjCharsetModified()
+void MapEditor::ProjCharsetModified()
 {
     Tilemap& map = mProj.maps[mCurMap];
     ProjMapModified(mCurMap, map.Bounds());
 }
 
-void MapPresenter::ProjEntsInserted(int mapNum, int entNum, int count)
+void MapEditor::ProjEntsInserted(int mapNum, int entNum, int count)
 {
     if (mapNum == mCurMap) {
-        mView.EntsModified();
+        EntsModified();
     }
 }
 
-void MapPresenter::ProjEntsRemoved(int mapNum, int entNum, int count)
+void MapEditor::ProjEntsRemoved(int mapNum, int entNum, int count)
 {
     if (mapNum == mCurMap) {
-        mView.EntsModified();
+        EntsModified();
     }
 }
 
-void MapPresenter::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData)
+void MapEditor::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData)
 {
     if (mapNum == mCurMap) {
-        mView.EntsModified();
+        EntsModified();
     }
 }
 
 
-void MapPresenter::Press(IView* view, PixPoint const& pt, int button)
+void MapEditor::Press(PixPoint const& pt, int button)
 {
-    mEd.tool->Press(view, mCurMap, pt, button);
+    mModel.tool->Press(this, mCurMap, pt, button);
 }
 
-void MapPresenter::Move(IView* view, PixPoint const& pt, int button)
+void MapEditor::Move(PixPoint const& pt, int button)
 {
-    mEd.tool->Move(view, mCurMap, pt, button);
+    mModel.tool->Move(this, mCurMap, pt, button);
 }
 
-void MapPresenter::Release(IView* view, PixPoint const& pt, int button)
+void MapEditor::Release(PixPoint const& pt, int button)
 {
-    mEd.tool->Release(view, mCurMap, pt, button);
+    mModel.tool->Release(this, mCurMap, pt, button);
 }
 
-void MapPresenter::SetSelectedEnts(std::vector<int> const& sel) {
+void MapEditor::SetSelectedEnts(std::vector<int> const& sel) {
     mSelectedEnts = sel;
-    mView.EntSelectionChanged();
+    EntSelectionChanged();
 }
 
-bool MapPresenter::IsEntSelected(int endIdx) const {
+bool MapEditor::IsEntSelected(int endIdx) const {
     return (std::find(mSelectedEnts.begin(), mSelectedEnts.end(), endIdx) != mSelectedEnts.end());
 }

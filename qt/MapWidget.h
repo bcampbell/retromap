@@ -8,19 +8,13 @@
 #include <QImage>
 
 #include "proj.h"
-#include "view.h"
-#include "mappresenter.h"
+#include "mapeditor.h"
 
 class Tool;
 
-// Implements the View part of MVP.
-// Provides the GUI part.
-// Handles rendering of map and overlayed stuff like cursors.
-// Also handles the initial layer of input, but delgates most input events
-// down to the Presenter layer.
-// The Presenter layer calls back to the view when the map changes, or to
-// update cursors.
-class MapWidget : public QWidget, public IView {
+// Main widget for editing a map via the GUI.
+// Aim to keep this as thin as possible, with all the GUI-neutral stuff down in MapEditor.
+class MapWidget : public QWidget, public MapEditor {
     Q_OBJECT
 
 public:
@@ -28,33 +22,17 @@ public:
 	MapWidget(QWidget* parent, Model& model);
     virtual ~MapWidget();
 
-    // IView methods
+    // MapEditor implementations
     virtual void CurMapChanged();
     virtual void MapModified(MapRect const& dirty);
     virtual void EntsModified();
     virtual void SetCursor(MapRect const& area);
     virtual void HideCursor();
     virtual void EntSelectionChanged();
-    virtual void SetSelectedEnts(std::vector<int> newSelection);
 
     void ShowGrid(bool yesno);
     bool IsGridShown() const {return mShowGrid;}
 
-    // called by mainwindow?
-    int CurrentMap() const {
-        return mPresenter.CurrentMap();
-    }
-
-    void MapNavLinear(int delta) {
-        mPresenter.MapNavLinear(delta);
-    }
-    void MapNav2D(int dx, int dy) {
-        mPresenter.MapNav2D(dx, dy);
-    }
-
-    std::vector<int> const& SelectedEnts() const {
-        return mPresenter.SelectedEnts();
-    }
 signals:
     void cursorChanged(MapRect const& cursor);
     // Emitted when presenter ent selection is changed by mapwidget.
@@ -70,7 +48,6 @@ protected:
 
 private:
     Model& mModel;
-    MapPresenter mPresenter;
     QImage mBacking;
     int mZoom{3};
     bool mShowGrid{false};

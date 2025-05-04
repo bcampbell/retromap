@@ -9,8 +9,7 @@ my_headers = [
   'cmd.h',
   'draw.h',
   'model.h',
-  'mappresenter.h',
-  'view.h',
+  'mapeditor.h',
   'proj.h',
   'tool.h',
 
@@ -30,7 +29,7 @@ my_sources = [
   'cmd.cpp',
   'draw.cpp',
   'model.cpp',
-  'mappresenter.cpp',
+  'mapeditor.cpp',
   'proj.cpp',
   'tool.cpp',
 

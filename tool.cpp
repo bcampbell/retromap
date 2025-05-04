@@ -2,9 +2,8 @@
 #include "draw.h"
 #include "tool.h"
 #include "proj.h"
-#include "view.h"
 #include "model.h"
-#include "mappresenter.h"
+#include "mapeditor.h"
 
 #include <cassert>
 
@@ -31,7 +30,7 @@ Tool::~Tool()
 // DrawTool
 //
 
-void DrawTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
+void DrawTool::Press(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     mPrevPos = tp;
@@ -64,7 +63,7 @@ void DrawTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
     mCmd->AddDamage(damage);
 }
 
-void DrawTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
+void DrawTool::Move(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
 
     //printf("Move\n");
@@ -109,7 +108,7 @@ void DrawTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
     mCmd->AddDamage(damage);
 }
 
-void DrawTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
+void DrawTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     //printf("Release\n");
     TilePoint tp = mProj.ToTilePoint(pos);
@@ -130,7 +129,7 @@ void DrawTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
 // PickupTool
 //
 
-void PickupTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
+void PickupTool::Press(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     Tilemap& map = mProj.maps[mapNum];
@@ -144,7 +143,7 @@ void PickupTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
     view->SetCursor(mSelection);
 }
 
-void PickupTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
+void PickupTool::Move(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (!mLatch) {
         return;
@@ -154,7 +153,7 @@ void PickupTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
     view->SetCursor(mSelection);
 }
 
-void PickupTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
+void PickupTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (mLatch) {
         TilePoint tp = mProj.ToTilePoint(pos);
@@ -186,7 +185,7 @@ void PickupTool::Reset()
 //
 
 
-void RectTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
+void RectTool::Press(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     Tilemap& map = mProj.maps[mapNum];
@@ -200,7 +199,7 @@ void RectTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
     view->SetCursor(mSelection);
 }
 
-void RectTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
+void RectTool::Move(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (!mLatch) {
         return;
@@ -210,7 +209,7 @@ void RectTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
     view->SetCursor(mSelection);
 }
 
-void RectTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
+void RectTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (mLatch) {
         TilePoint tp = mProj.ToTilePoint(pos);
@@ -248,7 +247,7 @@ void RectTool::Reset()
 // FloodFillTool
 //
 
-void FloodFillTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
+void FloodFillTool::Press(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     Tilemap& map = mProj.maps[mapNum];
@@ -273,13 +272,13 @@ void FloodFillTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
     mEd.AddCmd(cmd);
 }
 
-void FloodFillTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
+void FloodFillTool::Move(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     TilePoint tp = mProj.ToTilePoint(pos);
     view->SetCursor(MapRect(tp,1,1));
 }
 
-void FloodFillTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
+void FloodFillTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
 }
 
@@ -293,7 +292,7 @@ void FloodFillTool::Reset()
 //
 
 
-void EntTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
+void EntTool::Press(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
 //    TilePoint tp = mProj.ToTilePoint(pos);
 //    if (!map.IsValid(tp)) {
@@ -317,7 +316,7 @@ void EntTool::Press(IView* view, int mapNum, PixPoint const& pos, int b)
 //    view->SetCursor(mSelection);
 }
 
-void EntTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
+void EntTool::Move(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (mHandle == MOVE && mEnt != -1) {
         TilePoint tp = mProj.ToTilePoint(pos);
@@ -333,7 +332,7 @@ void EntTool::Move(IView* view, int mapNum, PixPoint const& pos, int b)
     }
 }
 
-void EntTool::Release(IView* view, int mapNum, PixPoint const& pos, int b)
+void EntTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b)
 {
     if (mHandle == MOVE && mEnt != -1) {
         TilePoint tp = mProj.ToTilePoint(pos);

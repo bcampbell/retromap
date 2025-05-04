@@ -10,7 +10,7 @@
 
 constexpr int CURSORPENW = 3;
 
-MapWidget::MapWidget(QWidget* parent, Model& model) : QWidget(parent), mModel(model), mPresenter(model, *this), mBacking()
+MapWidget::MapWidget(QWidget* parent, Model& model) : QWidget(parent), MapEditor(model), mModel(model), mBacking()
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     //setSizePolicy(QSizePolicy::Preferred);
@@ -98,15 +98,10 @@ void MapWidget::EntsModified()
 
 void MapWidget::EntSelectionChanged()
 {
+    emit entSelectionChanged();
     update();
 }
 
-
-void MapWidget::SetSelectedEnts(std::vector<int> newSelection)
-{
-    mPresenter.SetSelectedEnts(newSelection);
-    emit entSelectionChanged();
-}
 
 void MapWidget::UpdateBacking(MapRect const& dirty)
 {
@@ -156,7 +151,7 @@ void MapWidget::mousePressEvent(QMouseEvent *event)
     int butt = toToolButtons(event->buttons());
     QPoint pos(event->position().toPoint());
     PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-    mPresenter.Press(this, pix, butt);
+    Press(pix, butt);
     event->accept();
 }
 
@@ -165,7 +160,7 @@ void MapWidget::mouseMoveEvent(QMouseEvent *event)
     int butt = toToolButtons(event->buttons());
     QPoint pos(event->position().toPoint());
     PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-    mPresenter.Move(this, pix, butt);
+    Move(pix, butt);
     event->accept();
 }
 
@@ -175,7 +170,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent *event)
     // NOTE: butt will exclude the button that was just released!
     QPoint pos(event->position().toPoint());
     PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-    mPresenter.Release(this, pix, butt);
+    Release(pix, butt);
     event->accept();
 }
 
@@ -260,7 +255,7 @@ void MapWidget::paintEvent(QPaintEvent *event)
             if (entBound.IsEmpty()) {
                 continue;
             }
-            bool selected = mPresenter.IsEntSelected(entIdx);
+            bool selected = IsEntSelected(entIdx);
 
             QRect bound = FromMap(entBound);
             QPen p(QColor(0, 0, 255, selected ? 255: 128), 1);

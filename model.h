@@ -63,7 +63,6 @@ public:
     bool useBrush{false};   // use brush for drawing?
     int drawFlags{DRAWFLAG_ALL}; // which parts of cell to draw to
 
-
     Tool* tool{nullptr};
 
     void AddCmd(Cmd* cmd);
@@ -71,7 +70,6 @@ public:
     void Redo();
 
     void SetTool(int toolKind);
-
 
     // Some accessors with asserts.
     Tilemap& GetMap(int mapNum) {

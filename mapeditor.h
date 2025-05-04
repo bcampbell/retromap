@@ -6,38 +6,26 @@
 
 #include "model.h"
 
-class IView;
 struct Proj;
 
-// MapPresenter is Presenter part of MVP for the main map editing view (MapWidget).
-// Core class - no GUI code here, that's all in the view.
-// The view owns this object and uses it to provide all the editing
-// functionality other than the actual GUI interaction.
-class MapPresenter : public IModelListener {
+// Base class for map editor widget in the GUI.
+class MapEditor : public IModelListener {
 
 public:
-    MapPresenter() = delete;
-	MapPresenter(Model& model, IView& view);
-    ~MapPresenter();
+    MapEditor() = delete;
+	MapEditor(Model& model);
+    ~MapEditor();
 
 
     // set which map we're looking at
-    void AddView(IView* view);
-    void RemoveView(IView* view);
     void SetCurrentMap(int mapNum);
     int CurrentMap() const {return mCurMap;}
 
     void MapNavLinear(int delta);
     void MapNav2D(int dx, int dy);
 
-    void SetSelectedEnts(std::vector<int> const& sel);
     std::vector<int> const& SelectedEnts() const {return mSelectedEnts;}
     bool IsEntSelected(int endIdx) const;
-
-    // Called by view
-    void Press(IView* view, PixPoint const& pt, int button);
-    void Move(IView* view, PixPoint const& pt, int button);
-    void Release(IView* view, PixPoint const& pt, int button);
 
     // IModelListener
     virtual void ProjCharsetModified();
@@ -48,9 +36,26 @@ public:
     virtual void ProjEntsInserted(int mapNum, int entNum, int count);
     virtual void ProjEntsRemoved(int mapNum, int entNum, int count);
     virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
-private:
-    Model& mEd;
-    IView& mView;
+
+    // To be called by GUI.
+public:
+    void SetSelectedEnts(std::vector<int> const& newSelection);
+protected:
+    // GUI calls these and the MapEditor uses them to drive the current Tool.
+    void Press(PixPoint const& pt, int button);
+    void Move(PixPoint const& pt, int button);
+    void Release(PixPoint const& pt, int button);
+
+public:
+    // To be implemented by GUI.
+    virtual void CurMapChanged() = 0 ;
+    virtual void MapModified(MapRect const& dirty) = 0;
+    virtual void EntsModified() = 0;
+    virtual void SetCursor(MapRect const& area) = 0;
+    virtual void HideCursor() = 0;
+    virtual void EntSelectionChanged() = 0;
+protected:
+    Model& mModel;
     Proj& mProj;
     int mCurMap{0};
     std::vector<int> mSelectedEnts;

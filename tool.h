@@ -4,7 +4,7 @@ struct PixPoint;
 struct TilePoint;
 struct Cell;
 struct Proj;
-class IView;
+class MapEditor;
 class MapDrawCmd;
 class Model;
 
@@ -31,9 +31,9 @@ public:
 
     virtual int Kind() const = 0;
     // TODO: could get mapNum from view?
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b) {}
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b) {}
-    virtual void Release(IView* view,int mapNum, PixPoint const& pos, int b) {}
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b) {}
+    virtual void Release(MapEditor* view,int mapNum, PixPoint const& pos, int b) {}
 
     // Stop any in-progress operation and go back to initial state.
     virtual void Reset() {}
@@ -52,9 +52,9 @@ public:
     virtual ~DrawTool() {}
 
     virtual int Kind() const {return TOOL_DRAW;}
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapEditor* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset() {} //TODO!
 private:
     TilePoint mPrevPos;
@@ -71,9 +71,9 @@ public:
     virtual ~PickupTool() {}
 
     virtual int Kind() const {return TOOL_PICKUP;}
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapEditor* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     int mLatch{0};
@@ -90,9 +90,9 @@ public:
     virtual ~RectTool() {}
 
     virtual int Kind() const {return TOOL_RECT;}
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapEditor* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     int mLatch{0};
@@ -108,9 +108,9 @@ public:
     virtual ~FloodFillTool() {}
 
     virtual int Kind() const {return TOOL_FLOODFILL;}
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapEditor* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 };
 
@@ -124,9 +124,9 @@ public:
     virtual ~EntTool() {}
 
     virtual int Kind() const {return TOOL_ENT;}
-    virtual void Press(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Move(IView* view, int mapNum, PixPoint const& pos, int b);
-    virtual void Release(IView* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Press(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Move(MapEditor* view, int mapNum, PixPoint const& pos, int b);
+    virtual void Release(MapEditor* view, int mapNum, PixPoint const& pos, int b);
     virtual void Reset();
 private:
     enum Handle {NONE, MOVE, TOPLEFT, TOP, TOPRIGHT, RIGHT, BOTTOMRIGHT, BOTTOM, BOTTOMLEFT, LEFT};
