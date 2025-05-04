@@ -3,41 +3,21 @@
 #include "tool.h"
 #include "model.h"
 
-MapPresenter::MapPresenter(Model& ed) : mEd(ed), mProj(ed.proj)
+MapPresenter::MapPresenter(Model& model, IView& view) : mEd(model), mView(view), mProj(model.proj), mCurMap(0)
 {
-    SetCurrentMap(0);
-    ed.listeners.insert(this);
+    model.listeners.insert(this);
 }
 
 MapPresenter::~MapPresenter()
 {
     mEd.listeners.erase(this);
-    while(!mViews.empty()) {
-        RemoveView(*mViews.begin());
-    }
-}
-
-void MapPresenter::AddView(IView* view)
-{
-    mViews.insert(view);
-    view->SetPresenter(this);
-    view->SetMap(&mProj.maps[mCurMap], &mProj.charset, &mProj.palette);
-}
-
-void MapPresenter::RemoveView(IView* view)
-{
-    view->SetPresenter(nullptr);
-    view->SetMap(nullptr, nullptr, nullptr);
-    mViews.erase(view);
 }
 
 void MapPresenter::SetCurrentMap(int mapNum)
 {
     assert(mapNum >= 0 && mapNum < (int)mProj.maps.size());
     mCurMap = mapNum;
-    for (auto view : mViews) {
-        view->SetMap(&mProj.maps[mCurMap], &mProj.charset, &mProj.palette);
-    }
+    mView.CurMapChanged();
 }
 
 void MapPresenter::MapNavLinear(int delta)
@@ -73,9 +53,7 @@ void MapPresenter::MapNav2D(int dx, int dy)
 void MapPresenter::ProjMapModified(int mapNum, MapRect const& dirty)
 {
     if (mapNum == mCurMap) {
-        for (auto view : mViews) {
-            view->MapModified(dirty);
-        }
+        mView.MapModified(dirty);
     }
 }
 
@@ -119,27 +97,21 @@ void MapPresenter::ProjCharsetModified()
 void MapPresenter::ProjEntsInserted(int mapNum, int entNum, int count)
 {
     if (mapNum == mCurMap) {
-        for (auto view : mViews) {
-            view->EntsModified();
-        }
+        mView.EntsModified();
     }
 }
 
 void MapPresenter::ProjEntsRemoved(int mapNum, int entNum, int count)
 {
     if (mapNum == mCurMap) {
-        for (auto view : mViews) {
-            view->EntsModified();
-        }
+        mView.EntsModified();
     }
 }
 
 void MapPresenter::ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData)
 {
     if (mapNum == mCurMap) {
-        for (auto view : mViews) {
-            view->EntsModified();
-        }
+        mView.EntsModified();
     }
 }
 
@@ -161,9 +133,7 @@ void MapPresenter::Release(IView* view, PixPoint const& pt, int button)
 
 void MapPresenter::SetSelectedEnts(std::vector<int> const& sel) {
     mSelectedEnts = sel;
-    for (auto view : mViews) {
-        view->EntSelectionChanged();
-    }
+    mView.EntSelectionChanged();
 }
 
 bool MapPresenter::IsEntSelected(int endIdx) const {

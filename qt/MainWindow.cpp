@@ -29,7 +29,7 @@
 #include "model.h"
 
 MainWindow::MainWindow(QWidget *parent, Model& ed)
-    : QMainWindow(parent), mEd(ed), mPresenter(ed)
+    : QMainWindow(parent), mEd(ed)
 {
     mEd.modified = false;
 
@@ -47,12 +47,10 @@ MainWindow::MainWindow(QWidget *parent, Model& ed)
     RethinkTitle();
     resize(500, 500);
 
-    mPresenter.AddView(mMapWidget);
     show();
 }
 
 MainWindow::~MainWindow() {
-    mPresenter.RemoveView(mMapWidget);
     mEd.listeners.erase(this);
 }
 
@@ -67,7 +65,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::RethinkTitle()
 {
     QString t = QString("Retromap map %1/%2 - %3")
-        .arg(mPresenter.CurrentMap())
+        .arg(mMapWidget->CurrentMap())
         .arg((int)mEd.proj.maps.size())
         .arg(QString::fromStdString(mEd.mapFilename));
     setWindowTitle(t);
@@ -77,7 +75,7 @@ void MainWindow::RethinkTitle()
 // 
 void MainWindow::MapNumChanged()
 {
-    mEntWidget->SetMapNum(mPresenter.CurrentMap());
+    mEntWidget->SetMapNum(mMapWidget->CurrentMap());
     RethinkTitle();
 }
 
@@ -149,7 +147,7 @@ void MainWindow::createActions()
         connect(a, &QAction::triggered, [&](){
              // Can't delete last map.
             if (mEd.proj.maps.size() > 1) {
-                int cur = mPresenter.CurrentMap();
+                int cur = mMapWidget->CurrentMap();
                 auto* cmd = new DeleteMapsCmd(mEd, cur, cur + 1);
                 mEd.AddCmd(cmd);
             }
@@ -182,7 +180,7 @@ void MainWindow::createActions()
         a = new QAction(tr("North"), this);
         a->setShortcut(QKeySequence(Qt::Key_Up));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNav2D(0, -1);
+            mMapWidget->MapNav2D(0, -1);
             MapNumChanged();
         });
         mActions.mapNorth = a;
@@ -190,7 +188,7 @@ void MainWindow::createActions()
         a = new QAction(tr("South"), this);
         a->setShortcut(QKeySequence(Qt::Key_Down));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNav2D(0, 1);
+            mMapWidget->MapNav2D(0, 1);
             MapNumChanged();
         });
         mActions.mapSouth = a;
@@ -198,7 +196,7 @@ void MainWindow::createActions()
         a = new QAction(tr("West"), this);
         a->setShortcut(QKeySequence(Qt::Key_Left));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNav2D(-1, 0);
+            mMapWidget->MapNav2D(-1, 0);
             MapNumChanged();
         });
         mActions.mapWest = a;
@@ -206,7 +204,7 @@ void MainWindow::createActions()
         a = new QAction(tr("East"), this);
         a->setShortcut(QKeySequence(Qt::Key_Right));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNav2D(1, 0);
+            mMapWidget->MapNav2D(1, 0);
             MapNumChanged();
         });
         mActions.mapEast = a;
@@ -214,7 +212,7 @@ void MainWindow::createActions()
         a = new QAction(tr("Next"), this);
         a->setShortcut(QKeySequence(Qt::Key_Plus));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNavLinear(1);
+            mMapWidget->MapNavLinear(1);
             MapNumChanged();
         });
         mActions.mapNext = a;
@@ -222,7 +220,7 @@ void MainWindow::createActions()
         a = new QAction(tr("Previous"), this);
         a->setShortcut(QKeySequence(Qt::Key_Minus));
         connect(a, &QAction::triggered, [&](){
-            mPresenter.MapNavLinear(-1);
+            mMapWidget->MapNavLinear(-1);
             MapNumChanged();
         });
         mActions.mapPrev = a;
@@ -426,7 +424,7 @@ void MainWindow::createWidgets()
     statusBar()->addWidget(mCursorMsg);
 
     // The main map editing area
-    mMapWidget = new MapWidget(nullptr);
+    mMapWidget = new MapWidget(nullptr, mEd);
 
     mCharsetWidget = new CharsetWidget(nullptr);
 
@@ -504,12 +502,12 @@ void MainWindow::createWidgets()
     });
 
     connect(mMapWidget, &MapWidget::entSelectionChanged, this, [&]() {
-        mEntWidget->SetSelection(mPresenter.SelectedEnts());
+        mEntWidget->SetSelection(mMapWidget->SelectedEnts());
     });
 
     connect(mEntWidget, &EntWidget::selectionChanged, this, [&]() {
        auto sel = mEntWidget->Selection();
-       mPresenter.SetSelectedEnts(sel);
+       mMapWidget->SetSelectedEnts(sel);
     });
 
 
@@ -646,7 +644,7 @@ void MainWindow::help()
 
 void MainWindow::addMap()
 {
-    Tilemap& cur = mEd.proj.maps[mPresenter.CurrentMap()];
+    Tilemap& cur = mEd.proj.maps[mMapWidget->CurrentMap()];
     MapSizeDialog dlg(this, cur.w, cur.h);
     if (dlg.exec() != QDialog::Accepted) {
         return;
@@ -658,14 +656,14 @@ void MainWindow::addMap()
     map.cells.resize(map.w * map.h);
 
     // insert it after current one.
-    int n = mPresenter.CurrentMap() + 1;
+    int n = mMapWidget->CurrentMap() + 1;
     InsertMapsCmd* cmd = new InsertMapsCmd(mEd, {map}, n);
     mEd.AddCmd(cmd);
 }
 
 void MainWindow::resizeMap()
 {
-    int mapNum = mPresenter.CurrentMap();
+    int mapNum = mMapWidget->CurrentMap();
     Tilemap& cur = mEd.proj.maps[mapNum];
     MapSizeDialog dlg(this, cur.w, cur.h);
     if (dlg.exec() != QDialog::Accepted) {
@@ -679,7 +677,7 @@ void MainWindow::resizeMap()
 
 void MainWindow::exchangeMap()
 {
-    int mapNum = mPresenter.CurrentMap();
+    int mapNum = mMapWidget->CurrentMap();
     MapExchangeDialog dlg(this, mapNum, mapNum);
     if (dlg.exec() != QDialog::Accepted) {
         return;
@@ -706,7 +704,7 @@ void MainWindow::importMaps()
     }
 
     // Insert them after current one (disregard palette, charset etc...)
-    int n = mPresenter.CurrentMap() + 1;
+    int n = mMapWidget->CurrentMap() + 1;
     InsertMapsCmd* cmd = new InsertMapsCmd(mEd, donor.maps, n);
     mEd.AddCmd(cmd);
 }

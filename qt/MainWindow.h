@@ -59,7 +59,6 @@ private:
     Model& mEd;
 
     MapWidget* mMapWidget;
-    MapPresenter  mPresenter;   // TODO: embed in MapWidget.
     CharsetWidget* mCharsetWidget;
     PaletteWidget* mPaletteWidget;
     PenWidget* mPenWidget;

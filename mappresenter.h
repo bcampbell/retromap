@@ -1,3 +1,5 @@
+#pragma once
+
 #include <set>
 #include <vector>
 #include <algorithm>
@@ -7,13 +9,15 @@
 class IView;
 struct Proj;
 
-// MapPresenter is Presenter part of MVP
+// MapPresenter is Presenter part of MVP for the main map editing view (MapWidget).
 // Core class - no GUI code here, that's all in the view.
+// The view owns this object and uses it to provide all the editing
+// functionality other than the actual GUI interaction.
 class MapPresenter : public IModelListener {
 
 public:
     MapPresenter() = delete;
-	MapPresenter(Model& ed);
+	MapPresenter(Model& model, IView& view);
     ~MapPresenter();
 
 
@@ -21,7 +25,7 @@ public:
     void AddView(IView* view);
     void RemoveView(IView* view);
     void SetCurrentMap(int mapNum);
-    int CurrentMap() {return mCurMap;}
+    int CurrentMap() const {return mCurMap;}
 
     void MapNavLinear(int delta);
     void MapNav2D(int dx, int dy);
@@ -46,8 +50,7 @@ public:
     virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData);
 private:
     Model& mEd;
-    // Hmm. Should presenter and view be 1:1?
-    std::set<IView*> mViews;
+    IView& mView;
     Proj& mProj;
     int mCurMap{0};
     std::vector<int> mSelectedEnts;

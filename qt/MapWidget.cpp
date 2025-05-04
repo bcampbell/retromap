@@ -1,7 +1,6 @@
 #include "MapWidget.h"
 #include "helpers.h"
 
-#include "mappresenter.h"
 #include "tool.h"
 
 //#include <cassert>
@@ -11,45 +10,35 @@
 
 constexpr int CURSORPENW = 3;
 
-MapWidget::MapWidget(QWidget* parent) : QWidget(parent)
+MapWidget::MapWidget(QWidget* parent, Model& model) : QWidget(parent), mModel(model), mPresenter(model, *this), mBacking()
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     //setSizePolicy(QSizePolicy::Preferred);
     setMouseTracking(true);
+    CurMapChanged();
 }
 
 MapWidget::~MapWidget()
 {
 }
 
-void MapWidget::SetPresenter(MapPresenter* presenter)
+void MapWidget::CurMapChanged()
 {
-    mPresenter = presenter;
-}
-
-// TODO: should probably just read these from View on demand.
-void MapWidget::SetMap(Tilemap* tilemap, Charset* charset, Palette* palette)
-{
-    mTilemap = tilemap;
-    mCharset = charset;
-    mPalette = palette;
-    if (IsValidMap()) {
-        UpdateBacking(mTilemap->Bounds());
-    }
+    UpdateBacking(Map().Bounds());
     resize(sizeHint());
     update();
 }
 
 QRect MapWidget::FromMap(MapRect const& r) const {
-    int tw = mCharset->tw;
-    int th = mCharset->th;
+    int tw = mModel.proj.charset.tw;
+    int th = mModel.proj.charset.th;
     return QRect(r.x * tw * mZoom, r.y * th * mZoom,
         r.w * tw * mZoom, r.h * th * mZoom);
 }
 
 MapRect MapWidget::ToMap(QRectF const& r) const {
-    int tw = mCharset->tw * mZoom;
-    int th = mCharset->th * mZoom;
+    int tw = mModel.proj.charset.tw * mZoom;
+    int th = mModel.proj.charset.th * mZoom;
 
     MapRect out;
     out.x = r.x() / tw;
@@ -97,10 +86,8 @@ void MapWidget::SetCursor(MapRect const& cursor)
 
 void MapWidget::MapModified(MapRect const& dirty)
 {
-    if (IsValidMap()) {
-        UpdateBacking(dirty);
-        update(FromMap(dirty));
-    }
+    UpdateBacking(dirty);
+    update(FromMap(dirty));
 }
 
 void MapWidget::EntsModified()
@@ -117,21 +104,16 @@ void MapWidget::EntSelectionChanged()
 
 void MapWidget::SetSelectedEnts(std::vector<int> newSelection)
 {
-    if (mPresenter) {
-        mPresenter->SetSelectedEnts(newSelection);
-    }
+    mPresenter.SetSelectedEnts(newSelection);
     emit entSelectionChanged();
 }
 
 void MapWidget::UpdateBacking(MapRect const& dirty)
 {
-    if (!IsValidMap()) {
-        return;
-    }
-    int tw = mCharset->tw;
-    int th = mCharset->th;
-    int w = tw * mTilemap->w;
-    int h = th * mTilemap->h;
+    int tw = mModel.proj.charset.tw;
+    int th = mModel.proj.charset.th;
+    int w = tw * Map().w;
+    int h = th * Map().h;
     if (mBacking.width() != w || mBacking.height() != h) {
         // resize the backing bitmap
         mBacking = QImage(w, h, QImage::Format_RGBX8888);
@@ -140,8 +122,8 @@ void MapWidget::UpdateBacking(MapRect const& dirty)
     // Draw affected area into backing image.
     for (int y = dirty.y; y < dirty.y + dirty.h; ++y) {
         for (int x = dirty.x; x < dirty.x + dirty.w; ++x) {
-            Cell const& cell = mTilemap->CellAt(TilePoint(x, y));
-            RenderCell(mBacking, QPoint(x * tw, y * th), *mCharset, *mPalette, cell);
+            Cell const& cell = Map().CellAt(TilePoint(x, y));
+            RenderCell(mBacking, QPoint(x * tw, y * th), mModel.proj.charset, mModel.proj.palette, cell);
         }
     }
 }
@@ -150,11 +132,10 @@ void MapWidget::UpdateBacking(MapRect const& dirty)
 
 QSize MapWidget::sizeHint() const
 {
-    if (!IsValidMap()) {
-        return QSize(0,0);
-    }
-    int w = mCharset->tw * mTilemap->w;
-    int h = mCharset->th * mTilemap->h;
+    int tw = mModel.proj.charset.tw;
+    int th = mModel.proj.charset.th;
+    int w = tw * Map().w;
+    int h = th * Map().h;
     return QSize(w * mZoom, h * mZoom);
 }
 
@@ -172,35 +153,29 @@ static int toToolButtons(Qt::MouseButtons qb)
 
 void MapWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (mPresenter) {
-        int butt = toToolButtons(event->buttons());
-        QPoint pos(event->position().toPoint());
-        PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Press(this, pix, butt);
-    }
+    int butt = toToolButtons(event->buttons());
+    QPoint pos(event->position().toPoint());
+    PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
+    mPresenter.Press(this, pix, butt);
     event->accept();
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (mPresenter) {
-        int butt = toToolButtons(event->buttons());
-        QPoint pos(event->position().toPoint());
-        PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Move(this, pix, butt);
-    }
+    int butt = toToolButtons(event->buttons());
+    QPoint pos(event->position().toPoint());
+    PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
+    mPresenter.Move(this, pix, butt);
     event->accept();
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (mPresenter) {
-        int butt = toToolButtons(event->buttons());
-        // NOTE: butt will exclude the button that was just released!
-        QPoint pos(event->position().toPoint());
-        PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
-        mPresenter->Release(this, pix, butt);
-    }
+    int butt = toToolButtons(event->buttons());
+    // NOTE: butt will exclude the button that was just released!
+    QPoint pos(event->position().toPoint());
+    PixPoint pix(pos.x() / mZoom, pos.y() / mZoom);
+    mPresenter.Release(this, pix, butt);
     event->accept();
 }
 
@@ -236,13 +211,13 @@ void MapWidget::paintEvent(QPaintEvent *event)
 
     // Draw overlays
     {
-        MapRect m = mTilemap->Bounds().Clip(ToMap(event->rect()));
+        MapRect m = Map().Bounds().Clip(ToMap(event->rect()));
         if (mShowGrid) {
             // Draw grid
             QPen gridPen(QColor(0,255,0,255), 1, Qt::DotLine);
             painter.setPen(gridPen);
-            int tw = mCharset->tw * mZoom;
-            int th = mCharset->th * mZoom;
+            int tw = mModel.proj.charset.tw * mZoom;
+            int th = mModel.proj.charset.th * mZoom;
             for (int y = m.y; y <= m.y + m.h; ++y) {
                 QPoint p1(m.x * tw, y * th);
                 QPoint p2((m.x + m.w) *tw, y * th);
@@ -259,7 +234,7 @@ void MapWidget::paintEvent(QPaintEvent *event)
                     TilePoint tp(x, y);
 
                     QRect bound = FromMap(MapRect(tp, 1, 1));
-                    Cell const& c = mTilemap->CellAt(tp);
+                    Cell const& c = Map().CellAt(tp);
 
                     // text
                     QString t;
@@ -279,13 +254,13 @@ void MapWidget::paintEvent(QPaintEvent *event)
 
     // Draw ents
     {
-        for (int entIdx = 0; entIdx < (int)mTilemap->ents.size(); ++entIdx) {
-            Ent const& ent = mTilemap->ents[entIdx];
+        for (int entIdx = 0; entIdx < (int)Map().ents.size(); ++entIdx) {
+            Ent const& ent = Map().ents[entIdx];
             MapRect entBound = ent.Geometry();
             if (entBound.IsEmpty()) {
                 continue;
             }
-            bool selected = (mPresenter && mPresenter->IsEntSelected(entIdx));
+            bool selected = mPresenter.IsEntSelected(entIdx);
 
             QRect bound = FromMap(entBound);
             QPen p(QColor(0, 0, 255, selected ? 255: 128), 1);
