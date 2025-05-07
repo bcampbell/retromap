@@ -9,7 +9,7 @@
 
 constexpr int CURSORPENW = 3;
 
-WorldWidget::WorldWidget(QWidget* parent, Model& model) : QWidget(parent), mModel(model)
+WorldWidget::WorldWidget(QWidget* parent, Model& model) : QWidget(parent), mModel(model), mCurMap(-1)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     //setSizePolicy(QSizePolicy::Preferred);
@@ -18,6 +18,55 @@ WorldWidget::WorldWidget(QWidget* parent, Model& model) : QWidget(parent), mMode
 
 WorldWidget::~WorldWidget()
 {
+}
+
+
+void WorldWidget::setCurMap(int mapNum)
+{
+    mCurMap = mapNum;
+    update();
+}
+
+void WorldWidget::CalcLayout(int mapsacross)
+{
+    auto const& maps = mModel.proj.maps;
+    mLayout.resize(mModel.proj.maps.size());
+
+    // Calc max map size
+    int maxw = std::numeric_limits<int>::min();
+    int maxh = std::numeric_limits<int>::min();
+    for (Tilemap const& map : maps) {
+        if (map.w > maxw) {
+            maxw = map.w;
+        }
+        if (map.h > maxh) {
+            maxh = map.h;
+        }
+    }
+    // Layout
+    mExtent = MapRect();
+    int x = 0;
+    int y = 0;
+    for (size_t i = 0; i< maps.size(); ++i) {
+        mLayout[i] = MapRect(x*maxw, y*maxh, maps[i].w, maps[i].h);
+        mExtent.Merge(mLayout[i]);
+        ++x;
+        if (x>=mapsacross) {
+            x = 0;
+            ++y;
+        }
+    }
+}
+
+
+int WorldWidget::PickMap(TilePoint const& p) const
+{
+    for (size_t i = 0; i < mLayout.size(); ++i) {
+        if (mLayout[i].Contains(p)) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 
@@ -33,6 +82,16 @@ QSize WorldWidget::sizeHint() const
 void WorldWidget::mousePressEvent(QMouseEvent *event)
 {
     event->accept();
+
+    assert(mModel.proj.maps.size() == mOutlines.size());
+    for( size_t i = 0; i< mOutlines.size(); ++i) {
+        if (mOutlines[i].contains(event->position())) {
+            mCurMap = (int)i;
+            emit curMapChanged();
+            update();
+            return;
+        }
+    }
 }
 
 void WorldWidget::mouseMoveEvent(QMouseEvent *event)
@@ -54,52 +113,22 @@ void WorldWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
-
     Proj const& proj = mModel.proj;
 
-    int worldw = 7;
-    int worldh = 7;
-
-    //
-    std::vector<Rect> layout(proj.maps.size());
-    // Calc max map size
-    int maxw = std::numeric_limits<int>::min();
-    int maxh = std::numeric_limits<int>::min();
-    for (Tilemap const& map : proj.maps) {
-        if (map.w > maxw) {
-            maxw = map.w;
-        }
-        if (map.h > maxh) {
-            maxh = map.h;
-        }
-    }
-    // Layout
-    size_t i=0;
-    for (int wy = 0; wy < worldh; ++wy) {
-        for (int wx = 0; wx < worldw; ++wx) {
-            if (i<proj.maps.size()) {
-                layout[i] = Rect(wx*maxw, wy*maxh, proj.maps[i].w, proj.maps[i].h);
-            }
-            ++i;
-        }
-    }
+    CalcLayout(7);
 
     int tw = proj.charset.tw;
     int th = proj.charset.th;
     int zoom = 1;
-    QRectF logical(0,0,(tw*worldw*maxw), (th*worldh*maxh));
     QTransform xform;
-    float sx = size().width() / logical.width();
-    float sy = size().height() / logical.height();
+    float sx = size().width() / float(mExtent.w * tw);
+    float sy = size().height() / float(mExtent.h * th);
     xform.scale(sx,sy);
     painter.setTransform(xform);
 
     // draw
-    QPen p(QColor(0, 0, 255), 1);
-    painter.setPen(p);
-    painter.setBrush(Qt::NoBrush);
     for (size_t i = 0; i < proj.maps.size(); ++i) {
-        Rect const& r = layout[i];
+        MapRect const& r = mLayout[i];
         QRect bound(r.x * tw * zoom, r.y * th * zoom,
             r.w * tw * zoom, r.h * th * zoom);
 
@@ -118,13 +147,44 @@ void WorldWidget::paintEvent(QPaintEvent *event)
         }
 
         painter.drawImage(bound,img);
+    }
 
-        painter.drawRect(bound);
+    // overlays
+    painter.resetTransform();
+    QPen unselPen(QColor(64, 64, 255), 1);
+    QPen selPen(QColor(255, 255, 255), 1);
+
+    painter.setPen(unselPen);
+    painter.setBrush(Qt::NoBrush);
+    for (size_t i = 0; i < proj.maps.size(); ++i) {
+        MapRect const& r = mLayout[i];
+        QRect bound(r.x * tw * zoom, r.y * th * zoom,
+            r.w * tw * zoom, r.h * th * zoom);
+
+        if((int)i != mCurMap) {
+            painter.drawRect(mOutlines[i]);
+        }
+    }
+    if (mCurMap >= 0) {
+        painter.setPen(selPen);
+        painter.drawRect(mOutlines[mCurMap]);
     }
 
 }
 
 void WorldWidget::resizeEvent(QResizeEvent *event)
 {
+    CalcLayout(7);  // TODO: magic number
+    auto const& maps = mModel.proj.maps;
+    mOutlines.resize(maps.size());
+    int tw = mModel.proj.charset.tw;
+    int th = mModel.proj.charset.th;
+    float sx = size().width() / float(mExtent.w * tw);
+    float sy = size().height() / float(mExtent.h * th);
+
+    for (size_t i = 0; i < maps.size(); ++i) {
+        MapRect const& r = mLayout[i];
+        mOutlines[i] = QRectF((float)r.x * tw * sx, (float)r.y * th * sy, (float)r.w * tw * sx, (float)r.h * th * sy);
+    }
 }
 

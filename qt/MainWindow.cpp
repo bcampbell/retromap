@@ -76,6 +76,7 @@ void MainWindow::RethinkTitle()
 void MainWindow::MapNumChanged()
 {
     mEntWidget->SetMapNum(mMapWidget->CurrentMap());
+    mWorldWidget->setCurMap(mMapWidget->CurrentMap());
     RethinkTitle();
 }
 
@@ -537,6 +538,13 @@ void MainWindow::createWidgets()
         for (auto l : self->mEd.listeners) {
             l->EditorPenChanged();
         }
+    });
+    connect(mWorldWidget, &WorldWidget::curMapChanged, this, [self=this](){
+        int n = self->mWorldWidget->curMap();
+        if (n > 0) {
+            self->mMapWidget->SetCurrentMap(n);
+        }
+        self->MapNumChanged();
     });
 }
 

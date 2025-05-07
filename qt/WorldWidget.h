@@ -35,7 +35,11 @@ public:
     virtual void ProjEntsRemoved(int mapNum, int entNum, int count) {};
     virtual void ProjEntChanged(int mapNum, int entNum, Ent const& oldData, Ent const& newData) {};
 
+
+    void setCurMap(int mapNum); // -1=none
+    int curMap() const { return mCurMap; }
 signals:
+    void curMapChanged();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -48,6 +52,15 @@ protected:
 //    QSize sizeHint() const override;
 
 private:
+    void CalcLayout(int mapsacross);
+    int PickMap(TilePoint const& p) const;
+
     Model& mModel;
+    int mCurMap;
+    // Maps laid out in the world (in tile coords)
+    std::vector<MapRect> mLayout;
+    MapRect mExtent;
+    // Maps laid out in the widget (scaled to widget bounds)
+    std::vector<QRectF> mOutlines;
 };
 
