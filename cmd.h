@@ -24,12 +24,6 @@ public:
     MapDrawCmd() = delete;
     MapDrawCmd(Model& ed, int mapNum);
 
-    // Add changes to cmd, applied immediately.
-    void Plonk(TilePoint const& pos, Cell const& cell, int drawFlags);
-    void DrawBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags);
-    void EraseBrush(TilePoint const& pos, Tilemap const& brush, Cell const& transparent, int drawFlags);
-    void DrawRect(MapRect const& area, Cell const& pen, int drawFlags);
-    
     void AddDamage(MapRect const& damage);
     void Commit();  // no more plonking!
 
