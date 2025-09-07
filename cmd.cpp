@@ -323,3 +323,81 @@ void EditEntCmd::Undo()
     mState = NOT_DONE;
 }
 
+//
+// RemapTilesCmd
+//
+
+
+static void swapTiles(Tilemap& map, uint16_t a, uint16_t b)
+{
+    for (Cell& cell : map.cells) {
+        if (cell.tile == a) {
+            cell.tile = b;
+        } else if (cell.tile == b) {
+            cell.tile = a;
+        }
+    }
+}
+
+void RemapTilesCmd::Do()
+{
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+    swapTiles(map, mTileA, mTileB);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, map.Bounds());
+    }
+    mState = DONE;
+}
+
+void RemapTilesCmd::Undo()
+{
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+    swapTiles(map, mTileA, mTileB);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, map.Bounds());
+    }
+    mState = NOT_DONE;
+}
+
+
+//
+// RemapInkCmd
+//
+
+
+static void swapInk(Tilemap& map, uint16_t a, uint16_t b)
+{
+    for (Cell& cell : map.cells) {
+        if (cell.ink == a) {
+            cell.ink = b;
+        } else if (cell.ink == b) {
+            cell.ink = a;
+        }
+    }
+}
+
+void RemapInkCmd::Do()
+{
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+    swapInk(map, mInkA, mInkB);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, map.Bounds());
+    }
+    mState = DONE;
+}
+
+void RemapInkCmd::Undo()
+{
+    Proj& proj = mEd.proj;
+    Tilemap& map = proj.maps[mMapNum];
+    swapInk(map, mInkA, mInkB);
+    for (auto l : mEd.listeners) {
+        l->ProjMapModified(mMapNum, map.Bounds());
+    }
+    mState = NOT_DONE;
+}
+
+

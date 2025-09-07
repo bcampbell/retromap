@@ -154,3 +154,34 @@ private:
     int mEntNum;
 };
 
+
+// On the given map, swap all occurances of tile a with tile b.
+class RemapTilesCmd : public Cmd
+{
+public:
+    RemapTilesCmd() = delete;
+    RemapTilesCmd(Model& ed, int mapNum, uint16_t tileA, uint16_t tileB) :
+        Cmd(ed), mMapNum(mapNum), mTileA(tileA), mTileB(tileB) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    int mMapNum;
+    uint16_t mTileA;
+    uint16_t mTileB;
+};
+
+// On the given map, swap all occurances of ink a with ink b.
+class RemapInkCmd : public Cmd
+{
+public:
+    RemapInkCmd() = delete;
+    RemapInkCmd(Model& ed, int mapNum, uint8_t inkA, uint8_t inkB) :
+        Cmd(ed), mMapNum(mapNum), mInkA(inkA), mInkB(inkB) {}
+    virtual void Do();
+    virtual void Undo();
+private:
+    int mMapNum;
+    uint8_t mInkA;
+    uint8_t mInkB;
+};
+

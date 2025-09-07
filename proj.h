@@ -16,6 +16,7 @@ struct Cell {
     uint8_t paper{0};
 };
 
+
 // Base point struct. Derived structs for specific uses to help catch common
 // mixups at compile time.
 struct Point

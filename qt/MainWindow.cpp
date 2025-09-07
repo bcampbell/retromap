@@ -312,6 +312,27 @@ void MainWindow::createActions()
         });
     }
 
+    {
+        QAction* a;
+        mActions.remapTiles = a = new QAction(tr("Remap Tiles (lmb<->rmb)"));
+        a->setShortcut(QKeySequence(Qt::Key_T));
+        connect(a, &QAction::triggered, this, [&]() {
+            int cur = mMapWidget->CurrentMap();
+            auto* cmd = new RemapTilesCmd(mEd, cur, mEd.leftPen.tile, mEd.rightPen.tile);
+            mEd.AddCmd(cmd);
+        });
+    }
+
+    {
+        QAction* a;
+        mActions.remapInk = a = new QAction(tr("Remap Ink (lmb<->rmb)"));
+        a->setShortcut(QKeySequence(Qt::Key_I));
+        connect(a, &QAction::triggered, this, [&]() {
+            int cur = mMapWidget->CurrentMap();
+            auto* cmd = new RemapInkCmd(mEd, cur, mEd.leftPen.ink, mEd.rightPen.ink);
+            mEd.AddCmd(cmd);
+        });
+    }
 
     // Draw modes
 
@@ -383,6 +404,9 @@ void MainWindow::createMenus()
         m->addAction(mActions.useCustomBrush);
         m->addAction(mActions.hFlipBrush);
         m->addAction(mActions.vFlipBrush);
+        m->addSeparator();
+        m->addAction(mActions.remapTiles);
+        m->addAction(mActions.remapInk);
         menuBar()->addMenu(m);
     }
     {

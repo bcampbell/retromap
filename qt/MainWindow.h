@@ -92,6 +92,8 @@ private:
        QAction* useCustomBrush{nullptr};
        QAction* hFlipBrush{nullptr};
        QAction* vFlipBrush{nullptr};
+       QAction* remapTiles{nullptr};
+       QAction* remapInk{nullptr};
        QAction* drawModeNormal{nullptr};
        QAction* drawModeTile{nullptr};
        QAction* drawModeInk{nullptr};
