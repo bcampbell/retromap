@@ -159,12 +159,29 @@ void PickupTool::Release(MapEditor* view, int mapNum, PixPoint const& pos, int b
         TilePoint tp = mProj.ToTilePoint(pos);
         mSelection = UpdateSelection(mAnchor, tp);
 
-        // Pick up brush
-        Tilemap& map = mProj.maps[mapNum];
-        mEd.brush = map.Copy(mSelection);
-        mEd.useBrush = true;
-        for (auto l : mEd.listeners) {
-            l->EditorBrushChanged();
+        if (mSelection.w == 1 && mSelection.h == 1) {
+            // Special case - 1x1 pickup just sets one of the pens rather
+            // than picking up a brush.
+            Tilemap& map = mProj.maps[mapNum];
+            Cell cell = map.CellAt(mSelection.Pos());
+
+            if (mLatch & LEFT) {
+                mEd.leftPen = cell;
+            } else if (mLatch & RIGHT) {
+                mEd.rightPen = cell;
+            }
+            mEd.useBrush = false;
+            for (auto l : mEd.listeners) {
+                l->EditorPenChanged();
+            }
+        } else {
+            // Pick up brush
+            Tilemap& map = mProj.maps[mapNum];
+            mEd.brush = map.Copy(mSelection);
+            mEd.useBrush = true;
+            for (auto l : mEd.listeners) {
+                l->EditorBrushChanged();
+            }
         }
 
         mLatch = 0;
