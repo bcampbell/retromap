@@ -1,9 +1,6 @@
 #pragma once
 
-struct PixPoint;
-struct TilePoint;
-struct Cell;
-struct Proj;
+#include "proj.h"
 class MapEditor;
 class MapDrawCmd;
 class Model;

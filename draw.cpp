@@ -41,17 +41,47 @@ MapRect DrawRect(Tilemap& map, MapRect const& area, Cell const& pen, int drawFla
 
 
 
-
-
 // Do floodfill, return damaged area.
 // TODO: work out how drawFlags should work here.
 MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
 {
     MapRect damage;
 
+    auto match = [=](Cell const& a, Cell const& b) -> bool {
+        if (drawFlags & DRAWFLAG_TILE) {
+            if (a.tile != b.tile) {
+                return false;
+            }
+        }
+         if (drawFlags & DRAWFLAG_INK) {
+            if (a.ink != b.ink) {
+                return false;
+            }
+        }
+         if (drawFlags & DRAWFLAG_PAPER) {
+            if (a.paper != b.paper) {
+                return false;
+            }
+        }
+        // If we get this far, then it's a match.
+        return true;
+    };
+
+    auto apply = [=](Cell& dest, Cell const& pen) {
+        if (drawFlags & DRAWFLAG_TILE) {
+            dest.tile = pen.tile;
+        }
+        if (drawFlags & DRAWFLAG_INK) {
+            dest.ink= pen.ink;
+        }
+        if (drawFlags & DRAWFLAG_PAPER) {
+            dest.paper= pen.paper;
+        }
+    };
+
     // Sample the tile at the start point for what we'll be replacing.
     Cell old = map.CellAt(start);
-    if (old.tile == pen.tile) {
+    if (match(old, pen)) {
         // already done...
         return damage;
     }
@@ -62,18 +92,18 @@ MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
     {
         TilePoint pt = q.back();
         q.pop_back();
-        if (map.CellAt(pt).tile != old.tile) {
+        if (!match(map.CellAt(pt), old)) {
             continue;
         }
 
         // scan left and right to find span
         int y = pt.y;
         int l = pt.x;
-        while (l > 0 && map.CellAt(TilePoint(l - 1, y)).tile == old.tile) {
+        while (l > 0 && match(map.CellAt(TilePoint(l - 1, y)),old)) {
             --l;
         }
         int r = pt.x;
-        while (r < map.w - 1 && map.CellAt(TilePoint(r + 1, y)).tile == old.tile) {
+        while (r < map.w - 1 && match(map.CellAt(TilePoint(r + 1, y)), old)) {
             ++r;
         }
 
@@ -81,7 +111,7 @@ MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
         Cell* dest = map.CellPtr(TilePoint(l, y));
         int x;
         for (x = l; x <= r; ++x ) {
-            *dest++ = pen;
+            apply(*dest++, pen);
         }
 
         // expand the damage box to include the affected span
@@ -93,7 +123,7 @@ MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
         {
             for (x = l; x <= r; ++x)
             {
-                if (map.CellAt(TilePoint(x, y)).tile == old.tile) {
+                if (match(map.CellAt(TilePoint(x, y)), old)) {
                     q.push_back(TilePoint(x, y));
                 }
             }
@@ -105,7 +135,7 @@ MapRect FloodFill(Tilemap& map, TilePoint const& start, Cell pen, int drawFlags)
         {
             for (x = l; x <= r; ++x)
             {
-                if (map.CellAt(TilePoint(x, y)).tile == old.tile) {
+                if (match(map.CellAt(TilePoint(x, y)), old)) {
                     q.push_back(TilePoint(x, y));
                 }
             }
