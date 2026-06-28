@@ -3,6 +3,9 @@ project('retromap', 'cpp', default_options: ['cpp_std=c++20'])
 qt6 = import('qt6')
 qt6_dep = dependency('qt6', modules: ['Core', 'Gui', 'Widgets'])
 
+
+lua_dep = dependency('lua')
+
 #incdirs = include_directories('src')
 
 my_headers = [
@@ -11,6 +14,7 @@ my_headers = [
   'model.h',
   'mapeditor.h',
   'proj.h',
+  'scripting.h',
   'tool.h',
 
   'qt/CharsetWidget.h',
@@ -31,6 +35,7 @@ my_sources = [
   'model.cpp',
   'mapeditor.cpp',
   'proj.cpp',
+  'scripting.cpp',
   'tool.cpp',
 
   'qt/main.cpp',
@@ -55,7 +60,7 @@ moc_files = qt6.preprocess(moc_headers: my_headers,
 executable('retromap',
   sources: [my_sources, moc_files],
   #  include_directories: incdirs,
-  dependencies : [qt6_dep], #, png_dep, gif_dep, jpeg_dep],
+  dependencies : [qt6_dep, lua_dep],
   win_subsystem: 'windows',
   install: true)
 

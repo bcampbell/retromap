@@ -4,6 +4,7 @@
 #include "helpers.h"
 
 #include "model.h"
+#include "scripting.h"
 
 int main(int argc, char **argv)
 {
@@ -34,7 +35,10 @@ int main(int argc, char **argv)
         fenster->show();
 
         // TODO: need to clean up fenster?
+        RunScript("foo.lua", *ed);
     }
+
+
 
     auto status = app.exec();
 
