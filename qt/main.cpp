@@ -8,6 +8,47 @@
 
 int main(int argc, char **argv)
 {
+    // If -s or --script, run upon input files then exit. No GUI.
+    {
+        std::string script;
+        std::vector<std::string> infiles;
+        int i = 1;
+        while(i < argc) {
+            std::string arg(argv[i]);
+            if (arg == "--script" || arg == "-s") {
+                ++i;
+                if (i >= argc) {
+                    fprintf(stderr, "Missing param for --script/-s\n");
+                    return 1;
+                }
+                script = argv[i];
+            } else {
+                infiles.push_back(arg);
+            }
+            ++i;
+        }
+
+        if (!script.empty()) {
+            // Script file was specified. Run in CLI-only mode. No QT GUI stuff!
+            for(auto infile : infiles) {
+                Model model;
+                if (!LoadProject(model.proj, infile.c_str())) {
+                    fprintf(stderr, "Error loading %s\n", infile.c_str());
+                    return 1;
+                }
+                model.mapFilename = infile;
+                int result = RunScript(script.c_str(), model);
+                if (result != 0) {
+                    return result;
+                }
+            }
+            return 0;  // Success!
+        }
+    }
+
+    // If we get this far we're going full GUI.
+    // Ignore the previous commandline parsing and let QT deal with it.
+
     QApplication app (argc, argv);
 
     std::vector<Model*> editors;
@@ -33,12 +74,8 @@ int main(int argc, char **argv)
     for (auto ed : editors) {
         MainWindow *fenster = new MainWindow(nullptr, *ed);
         fenster->show();
-
         // TODO: need to clean up fenster?
-        RunScript("foo.lua", *ed);
     }
-
-
 
     auto status = app.exec();
 
@@ -49,5 +86,3 @@ int main(int argc, char **argv)
 
     return status;
 }
-
-

@@ -1,3 +1,12 @@
+-- example retromap script
+--
+-- e.g.
+-- $ retromap --script foo.lua mapfile.r2
+--
+--
+-- Script environment has std lua libs.
+-- Also has `proj`, a table-based dump of the loaded map project.
+
 
 function dump(v)
     if indent == nil then

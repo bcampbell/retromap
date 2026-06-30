@@ -97,7 +97,7 @@ static void pushent(lua_State* L, Ent const& ent)
 
 
 
-void RunScript(const char* script, Model const& model)
+int RunScript(const char* script, Model const& model)
 {
     lua_State *L = luaL_newstate(); // Create new Lua state
     luaL_openlibs(L);               // Load Lua libraries
@@ -105,12 +105,15 @@ void RunScript(const char* script, Model const& model)
     pushmodel(L, model);
     lua_setglobal(L, "proj");
 
+    int result = 0;
     // Execute Lua script
     if (luaL_dofile(L, script)) {
-        printf("Error: %s\n", lua_tostring(L, -1));
+        fprintf(stderr, "Error running %s: %s\n", script, lua_tostring(L, -1));
+        result = 1;  // failure code.
     }
 
     lua_close(L); // Close Lua state
+    return result;
 }
 
 
